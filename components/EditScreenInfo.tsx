@@ -1,12 +1,12 @@
 import { Text, View } from 'react-native';
 
 export const EditScreenInfo = ({ path }: { path: string }) => {
-  const title = 'Open up the code for this screen:';
+  const title = 'Clos up the code for this screen:';
   const description =
     'Change any of the text, save the file, and your app will automatically update.';
 
   return (
-    <View>
+    <View className="bg-red-500">
       <View className={styles.getStartedContainer}>
         <Text className={styles.getStartedText}>{title}</Text>
         <View className={styles.codeHighlightContainer + styles.homeScreenFilename}>
