@@ -85,7 +85,6 @@ export const SpotifyProvider = ({ children }: { children: ReactNode }) => {
 
         const userData = await userResponse.json();
 
-        console.log(userData);
         setUser(userData);
       }
     } catch (error) {
