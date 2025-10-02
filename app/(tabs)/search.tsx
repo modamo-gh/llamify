@@ -1,12 +1,13 @@
 import { Stack } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Image, Keyboard, TextInput, View } from 'react-native';
+import { Dimensions, FlatList, Image, Keyboard, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSpotify } from '~/context/Spotify';
 
 const Search = () => {
-  const { user } = useSpotify();
+  const { token, user } = useSpotify();
 
+  const [searchResults, setSearchResults] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
 
   const debounce = <T extends (...args: any[]) => any>(func: T, delay: number) => {
@@ -29,10 +30,25 @@ const Search = () => {
         return;
       }
 
-      console.log(term);
+      try {
+        const results = await fetch(
+          `https://api.spotify.com/v1/search?q=${encodeURIComponent(term.trim())}&type=album&limit=5`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        const data = await results.json();
+        const r = [...data.albums.items.map((item) => item.images[0].url)];
+
+        console.log(r);
+        setSearchResults(r);
+      } catch (error) {}
     }, 400),
     []
   );
+
+  const screenWidth = Dimensions.get('screen').width;
+  const imageDimension = (screenWidth - 40) / 2;
 
   return (
     <>
@@ -55,7 +71,23 @@ const Search = () => {
             source={{ uri: user?.images?.[0]?.url }}
           />
         </View>
-        <View className="flex-[9]"></View>
+        <View className="flex w-full flex-[9] p-4">
+          <FlatList
+            className="w-full flex-1"
+            columnWrapperClassName="gap-4"
+            contentContainerClassName="gap-4"
+            data={searchResults}
+            keyExtractor={(item, index) => `${index}`}
+            numColumns={2}
+            renderItem={({ item }) => (
+              <Image
+                className="rounded-lg"
+                source={{ uri: item }}
+                style={{ height: imageDimension, width: imageDimension }}
+              />
+            )}
+          />
+        </View>
       </SafeAreaView>
     </>
   );
