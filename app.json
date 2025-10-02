@@ -3,7 +3,6 @@
     "name": "llamify",
     "slug": "llamify",
     "version": "1.0.0",
-
     "scheme": "llamify",
     "web": {
       "bundler": "metro",
