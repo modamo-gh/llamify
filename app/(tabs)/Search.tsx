@@ -219,12 +219,12 @@ const Search = () => {
                                         position: "bottom",
                                         progressBarColor: "#22C55E",
                                         textColor: "#FAFAFA",
-                                        text1: "Item successfully added!",
+                                        text1: "Item successfully added to Listen Today!",
                                         type: "success",
                                     });
                                 }}>
                                 <Text className="text-xl font-bold text-zinc-50">
-                                    {inListenToday && "Already in "}Listen Today
+                                    {inListenToday ? "Already in " : "Add to "}Listen Today
                                 </Text>
                             </Pressable>
                             <Pressable
@@ -237,9 +237,18 @@ const Search = () => {
                                     await addToList(selectedItem!, "later");
 
                                     ref.current?.close();
+
+                                    Toast.show({
+                                        backgroundColor: "#262626",
+                                        position: "bottom",
+                                        progressBarColor: "#22C55E",
+                                        textColor: "#FAFAFA",
+                                        text1: "Item successfully added to Listen Later!",
+                                        type: "success",
+                                    });
                                 }}>
                                 <Text className="text-xl font-bold text-zinc-50">
-                                    {inListenLater && "Already in "}Listen Later
+                                    {inListenLater ? "Already in " : "Add to "}Listen Later
                                 </Text>
                             </Pressable>
                             <Pressable
