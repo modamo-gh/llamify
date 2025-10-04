@@ -18,7 +18,7 @@ const Login = () => {
           onPress={() => {
             promptAsync();
             if (token) {
-              router.push('/(tabs)/search');
+              router.push('/(tabs)/Search');
             }
           }}>
           <Text className="text-lg font-semibold text-zinc-50">Login with Spotify</Text>

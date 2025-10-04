@@ -1,3 +1,5 @@
+import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import * as Haptics from "expo-haptics";
 import { Stack } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import {
@@ -11,23 +13,20 @@ import {
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useList } from "~/context/List";
 import { useSpotify } from "~/context/Spotify";
-import * as Haptics from "expo-haptics";
-import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
-
-type SpotifyItem = {
-    imageURL: string;
-    name: string;
-    type: string;
-};
+import { SpotifyItem } from "~/types";
 
 const Search = () => {
+    const { addToList } = useList();
+
     const snapPoints = useMemo(() => ["25%"], []);
 
     const { token, user } = useSpotify();
 
     const [searchResults, setSearchResults] = useState<SpotifyItem[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
+    const [selectedItem, setSelectedItem] = useState<null | SpotifyItem>(null);
     const [showBottomSheet, setShowBottomSheet] = useState(false);
 
     const debounce = <T extends (...args: any[]) => any>(func: T, delay: number) => {
@@ -71,6 +70,7 @@ const Search = () => {
                                             "../../assets/playstore.png",
                                         name: item.name || "",
                                         type,
+                                        uri: item.uri,
                                     }) as SpotifyItem
                             )
                         );
@@ -82,6 +82,7 @@ const Search = () => {
                                         item?.images?.[0]?.url || "../../assets/playstore.png",
                                     name: item?.name || "",
                                     type,
+                                    uri: item.uri,
                                 } as SpotifyItem;
                             })
                         );
@@ -136,11 +137,15 @@ const Search = () => {
                         numColumns={2}
                         renderItem={({ item }) => (
                             <Pressable
+                                className="active:opacity-80"
                                 onPress={() => {
                                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                                    setSelectedItem(item);
                                     setShowBottomSheet(true);
                                 }}>
-                                <View className="" style={{ width: imageDimension }}>
+                                <View
+                                    className="flex gap-2 rounded-lg bg-neutral-800 p-2 shadow-lg"
+                                    style={{ width: imageDimension }}>
                                     <Image
                                         className="aspect-square w-full rounded-lg"
                                         source={{ uri: item.imageURL }}
@@ -168,17 +173,21 @@ const Search = () => {
                             <Pressable
                                 className="flex w-full items-center justify-center"
                                 style={{ height: bottomSheetOptionHeight }}
-                                onPress={() =>
-                                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
-                                }>
+                                onPress={() => {
+                                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                                    addToList(selectedItem!, "today");
+                                    setShowBottomSheet(false);
+                                }}>
                                 <Text className="text-xl font-bold text-zinc-50">Listen Today</Text>
                             </Pressable>
                             <Pressable
                                 className="flex w-full items-center justify-center"
                                 style={{ height: bottomSheetOptionHeight }}
-                                onPress={() =>
-                                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
-                                }>
+                                onPress={async () => {
+                                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                                    await addToList(selectedItem!, "later");
+                                    setShowBottomSheet(false);
+                                }}>
                                 <Text className="text-xl font-bold text-zinc-50">Listen Later</Text>
                             </Pressable>
                             <Pressable
