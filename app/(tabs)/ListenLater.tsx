@@ -1,16 +1,59 @@
+import { FontAwesome } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import { Stack } from "expo-router";
-import { Text } from "react-native";
+import { FlatList, Image, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useList } from "~/context/List";
+import { useSpotify } from "~/context/Spotify";
 
 const ListenLater = () => {
     const { listenLater } = useList();
 
+    const { user } = useSpotify();
+
     return (
         <>
             <Stack.Screen options={{ headerShown: false }} />
-            <SafeAreaView className="flex flex-1 bg-neutral-900">
-                <Text>{JSON.stringify(listenLater)}</Text>
+            <SafeAreaView className="flex flex-1 bg-neutral-900" edges={["top"]}>
+                <View className="flex w-full flex-1 flex-row gap-4 px-4">
+                    <View className="flex-1" />
+                    <Image
+                        className="aspect-square max-h-full max-w-full rounded-lg"
+                        source={{ uri: user?.images?.[0]?.url }}
+                    />
+                </View>
+                <View className="flex w-full flex-[9] p-4">
+                    <FlatList
+                        contentContainerClassName="gap-4"
+                        data={listenLater}
+                        renderItem={({ item }) => (
+                            <View className="flex h-[96px] w-full flex-row items-center gap-2 rounded-lg bg-neutral-800 p-2 shadow-lg">
+                                <Image
+                                    className="aspect-square h-full rounded-lg"
+                                    source={{ uri: item.imageURL }}
+                                />
+                                <View className="flex h-full flex-1 justify-around">
+                                    <Text className="text-xl text-zinc-50" numberOfLines={1}>
+                                        {item.name}
+                                    </Text>
+                                    <Text className="text-zinc-50/80" numberOfLines={1}>
+                                        {item.type[0].toUpperCase()}
+                                        {item.type.slice(1, item.type.length - 1)}
+                                    </Text>
+                                </View>
+                                <Pressable
+                                    className="active:opacity-80"
+                                    onPress={() => {
+                                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                                    }}>
+                                    <View className="flex h-12 w-12 items-center justify-center rounded-full bg-green-500">
+                                        <FontAwesome name="play" size={20} />
+                                    </View>
+                                </Pressable>
+                            </View>
+                        )}
+                    />
+                </View>
             </SafeAreaView>
         </>
     );

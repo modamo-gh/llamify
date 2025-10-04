@@ -46,8 +46,19 @@ export const ListProvider = ({ children }: { children: ReactNode }) => {
                 throw error;
             }
 
-            const later = data.filter((item) => item.list === "later");
-            const today = data.filter((item) => item.list === "today");
+            const transformItem = (item) => {
+                return {
+                    imageURL: item.image_url,
+                    list: item.list,
+                    name: item.name,
+                    type: item.type,
+                    uri: item.uri,
+                    userID: item.user_id,
+                };
+            };
+
+            const later = data.filter((item) => item.list === "later").map(transformItem);
+            const today = data.filter((item) => item.list === "today").map(transformItem);
 
             setListenLater(later);
             setListenToday(today);

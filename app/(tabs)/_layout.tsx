@@ -5,7 +5,8 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: 'black',
+        tabBarActiveTintColor: "#22C55E",
+        tabBarStyle: {backgroundColor: "#171717", borderTopWidth: 0}
       }}>
       <Tabs.Screen
         name="Search"

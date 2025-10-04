@@ -150,11 +150,11 @@ const Search = () => {
                                         className="aspect-square w-full rounded-lg"
                                         source={{ uri: item.imageURL }}
                                     />
-                                    <Text className="text-zinc-50/80" numberOfLines={1}>
-                                        Name: {item.name}
+                                    <Text className="text-zinc-50" numberOfLines={1}>
+                                        {item.name}
                                     </Text>
                                     <Text className="text-zinc-50/80">
-                                        Type: {item.type[0].toUpperCase()}
+                                        {item.type[0].toUpperCase()}
                                         {item.type.slice(1, item.type.length - 1)}
                                     </Text>
                                 </View>
@@ -169,7 +169,7 @@ const Search = () => {
                         index={showBottomSheet ? 1 : -1}
                         onClose={() => setShowBottomSheet(false)}
                         snapPoints={snapPoints}>
-                        <BottomSheetView className=" bg-green-500">
+                        <BottomSheetView className="bg-green-500">
                             <Pressable
                                 className="flex w-full items-center justify-center"
                                 style={{ height: bottomSheetOptionHeight }}
