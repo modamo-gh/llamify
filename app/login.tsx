@@ -1,4 +1,5 @@
 import { useRouter } from 'expo-router';
+import { useEffect } from 'react';
 import { Image, Pressable, Text, View } from 'react-native';
 import { useSpotify } from '~/context/Spotify';
 
@@ -6,6 +7,12 @@ const Login = () => {
   const router = useRouter();
 
   const { token, promptAsync } = useSpotify();
+
+  useEffect(()=> {
+    if(token){
+      router.replace("/(tabs)/Search")
+    }
+  }, [])
 
   return (
     <View className="flex flex-1 items-center justify-center bg-neutral-900">
@@ -17,6 +24,7 @@ const Login = () => {
           className="flex h-12 w-64 items-center justify-center rounded-lg bg-green-500 px-2 py-1 active:bg-green-600"
           onPress={() => {
             promptAsync();
+            
             if (token) {
               router.push('/(tabs)/Search');
             }

@@ -1,7 +1,6 @@
 import { FontAwesome } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { Stack } from "expo-router";
-import { useState } from "react";
 import { FlatList, Image, Pressable, Text, View } from "react-native";
 import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import Animated, {
