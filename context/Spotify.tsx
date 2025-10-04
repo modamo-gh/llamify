@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { makeRedirectUri, useAuthRequest } from "expo-auth-session";
 import * as WebBrowser from "expo-web-browser";
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
@@ -39,6 +40,25 @@ export const SpotifyProvider = ({ children }: { children: ReactNode }) => {
     );
 
     useEffect(() => {
+        const loadStoredAuth = async () => {
+            try {
+                const savedToken = await AsyncStorage.getItem("llamify_token");
+                const savedUser = await AsyncStorage.getItem("llamify_user");
+
+                if (savedToken) {
+                    setToken(savedToken);
+                }
+
+                if (savedUser) {
+                    setUser(JSON.parse(savedUser));
+                }
+            } catch {}
+        };
+
+        loadStoredAuth();
+    }, []);
+
+    useEffect(() => {
         if (response?.type === "success") {
             const { code } = response.params;
 
@@ -61,9 +81,11 @@ export const SpotifyProvider = ({ children }: { children: ReactNode }) => {
             });
 
             const tokenData = await tokenResponse.json();
+            const accessToken = tokenData.access_token;
 
-            if (tokenData.access_token) {
-                setToken(tokenData.access_token);
+            if (accessToken) {
+                setToken(accessToken);
+                await AsyncStorage.setItem("llamify_token", accessToken);
 
                 const userResponse = await fetch("https://api.spotify.com/v1/me", {
                     headers: {
@@ -74,6 +96,7 @@ export const SpotifyProvider = ({ children }: { children: ReactNode }) => {
                 const userData = await userResponse.json();
 
                 setUser(userData);
+                await AsyncStorage.setItem("llamify_user", JSON.stringify(userData));
 
                 await supabase.from("users").upsert({ id: userData.id });
             }
@@ -85,6 +108,7 @@ export const SpotifyProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const value = { isAuthenticated: !!token, loading, request, promptAsync, token, user };
+
     return <SpotifyContext.Provider value={value}>{children}</SpotifyContext.Provider>;
 };
 
