@@ -1,7 +1,7 @@
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import * as Haptics from "expo-haptics";
 import { Stack } from "expo-router";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
     Dimensions,
     FlatList,
@@ -21,6 +21,8 @@ const Search = () => {
     const { addToList } = useList();
 
     const snapPoints = useMemo(() => ["25%"], []);
+
+    const ref = useRef<BottomSheet>(null);
 
     const { token, user } = useSpotify();
 
@@ -115,7 +117,12 @@ const Search = () => {
                         className="flex-1 rounded-lg border border-green-500 px-2 text-zinc-50"
                         onChangeText={(term) => {
                             setSearchTerm(term);
-                            getDebouncedResults(term);
+
+                            if (term.length) {
+                                getDebouncedResults(term);
+                            } else {
+                                setSearchResults([]);
+                            }
                         }}
                         onEndEditing={() => Keyboard.dismiss()}
                         placeholder="Enter a search term or Spotify URL"
@@ -168,6 +175,7 @@ const Search = () => {
                         enablePanDownToClose
                         index={showBottomSheet ? 1 : -1}
                         onClose={() => setShowBottomSheet(false)}
+                        ref={ref}
                         snapPoints={snapPoints}>
                         <BottomSheetView className="bg-green-500">
                             <Pressable
@@ -175,8 +183,10 @@ const Search = () => {
                                 style={{ height: bottomSheetOptionHeight }}
                                 onPress={() => {
                                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
                                     addToList(selectedItem!, "today");
-                                    setShowBottomSheet(false);
+
+                                    ref.current?.close();
                                 }}>
                                 <Text className="text-xl font-bold text-zinc-50">Listen Today</Text>
                             </Pressable>
@@ -185,8 +195,10 @@ const Search = () => {
                                 style={{ height: bottomSheetOptionHeight }}
                                 onPress={async () => {
                                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
                                     await addToList(selectedItem!, "later");
-                                    setShowBottomSheet(false);
+
+                                    ref.current?.close();
                                 }}>
                                 <Text className="text-xl font-bold text-zinc-50">Listen Later</Text>
                             </Pressable>
@@ -194,7 +206,8 @@ const Search = () => {
                                 className="flex w-full items-center justify-center"
                                 onPress={() => {
                                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                                    setShowBottomSheet(false);
+                                    
+                                    ref.current?.close();
                                 }}
                                 style={{ height: bottomSheetOptionHeight }}>
                                 <Text className="text-xl font-bold text-red-500">Cancel</Text>

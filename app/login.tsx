@@ -12,7 +12,7 @@ const Login = () => {
     if(token){
       router.replace("/(tabs)/Search")
     }
-  }, [])
+  }, [token])
 
   return (
     <View className="flex flex-1 items-center justify-center bg-neutral-900">
@@ -24,10 +24,6 @@ const Login = () => {
           className="flex h-12 w-64 items-center justify-center rounded-lg bg-green-500 px-2 py-1 active:bg-green-600"
           onPress={() => {
             promptAsync();
-            
-            if (token) {
-              router.push('/(tabs)/Search');
-            }
           }}>
           <Text className="text-lg font-semibold text-zinc-50">Login with Spotify</Text>
         </Pressable>
