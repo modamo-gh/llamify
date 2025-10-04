@@ -41,7 +41,7 @@ const ListenLater = () => {
 
         return (
             <AnimatedPressable
-                className="flex w-[100px] items-center justify-center bg-red-500 active:opacity-80"
+                className="flex w-[100px] items-center justify-center rounded-l-lg bg-red-500 active:opacity-80"
                 onPress={async () => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 

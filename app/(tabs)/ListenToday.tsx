@@ -41,7 +41,7 @@ const ListenToday = () => {
 
         return (
             <AnimatedPressable
-                className="flex w-[100px] items-center justify-center bg-red-500 active:opacity-80"
+                className="flex w-[100px] items-center justify-center rounded-l-lg bg-red-500 active:opacity-80"
                 onPress={async () => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
@@ -71,7 +71,9 @@ const ListenToday = () => {
                         renderItem={({ item }) => (
                             <Swipeable
                                 overshootLeft={false}
-                                renderLeftActions={(progress, dragX) => renderLeft(progress, dragX, item)}
+                                renderLeftActions={(progress, dragX) =>
+                                    renderLeft(progress, dragX, item)
+                                }
                                 renderRightActions={(progress, dragX, swipeable) => null}>
                                 <View className="flex h-[96px] w-full flex-row items-center gap-2 rounded-lg bg-neutral-800 p-2 shadow-lg">
                                     <Image

@@ -16,6 +16,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useList } from "~/context/List";
 import { useSpotify } from "~/context/Spotify";
 import { SpotifyItem } from "~/types";
+import ToastManager, { Toast } from "toastify-react-native";
 
 const Search = () => {
     const { addToList, listenLater, listenToday } = useList();
@@ -148,19 +149,31 @@ const Search = () => {
                             <Pressable
                                 className="active:opacity-80"
                                 onPress={() => {
-                                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-
                                     setSelectedItem(item);
 
                                     const ilt = listenToday.some((i) => i.uri === item.uri);
                                     const ill = listenLater.some((i) => i.uri === item.uri);
 
+                                    if (!ill || !ilt) {
+                                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                                    } else {
+                                        Haptics.notificationAsync(
+                                            Haptics.NotificationFeedbackType.Error
+                                        );
+
+                                        Toast.show({
+                                            backgroundColor: "#262626",
+                                            position: "bottom",
+                                            progressBarColor: "#EF4444",
+                                            textColor: "#FAFAFA",
+                                            text1: "Item exists in both lists already",
+                                            type: "error",
+                                        });
+                                    }
+
+                                    setShowBottomSheet(!ill || !ilt);
                                     setInListenToday(ilt);
                                     setInListenLater(ill);
-
-                                    if (!ill || !ilt) {
-                                        setShowBottomSheet(true);
-                                    }
                                 }}>
                                 <View
                                     className="flex gap-2 rounded-lg bg-neutral-800 p-2 shadow-lg"
@@ -191,7 +204,8 @@ const Search = () => {
                         snapPoints={snapPoints}>
                         <BottomSheetView className="bg-green-500">
                             <Pressable
-                                className="flex w-full items-center justify-center"
+                                className="flex w-full items-center justify-center disabled:opacity-80"
+                                disabled={inListenToday}
                                 style={{ height: bottomSheetOptionHeight }}
                                 onPress={() => {
                                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -199,13 +213,23 @@ const Search = () => {
                                     addToList(selectedItem!, "today");
 
                                     ref.current?.close();
+
+                                    Toast.show({
+                                        backgroundColor: "#262626",
+                                        position: "bottom",
+                                        progressBarColor: "#22C55E",
+                                        textColor: "#FAFAFA",
+                                        text1: "Item successfully added!",
+                                        type: "success",
+                                    });
                                 }}>
                                 <Text className="text-xl font-bold text-zinc-50">
                                     {inListenToday && "Already in "}Listen Today
                                 </Text>
                             </Pressable>
                             <Pressable
-                                className="flex w-full items-center justify-center"
+                                className="flex w-full items-center justify-center disabled:opacity-80"
+                                disabled={inListenLater}
                                 style={{ height: bottomSheetOptionHeight }}
                                 onPress={async () => {
                                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -231,6 +255,7 @@ const Search = () => {
                         </BottomSheetView>
                     </BottomSheet>
                 )}
+                <ToastManager useModal={false} />
             </SafeAreaView>
         </>
     );
