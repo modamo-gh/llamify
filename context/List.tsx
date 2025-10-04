@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useContext, useState } from "react";
+import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import { ListContextType, SpotifyItem } from "~/types";
 import { supabase } from "~/utils/supabase";
 import { useSpotify } from "./Spotify";
@@ -10,6 +10,12 @@ export const ListProvider = ({ children }: { children: ReactNode }) => {
 
     const [listenLater, setListenLater] = useState<SpotifyItem[]>([]);
     const [listenToday, setListenToday] = useState<SpotifyItem[]>([]);
+
+    useEffect(() => {
+        if (user?.id) {
+            getLists();
+        }
+    }, [user?.id]);
 
     const addToList = async (item: SpotifyItem, list: "later" | "today") => {
         if (list === "later") {
@@ -32,7 +38,25 @@ export const ListProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
-    const value = { addToList };
+    const getLists = async () => {
+        try {
+            const { data, error } = await supabase.from("items").select("*").eq("user_id", user.id);
+
+            if (error) {
+                throw error;
+            }
+
+            const later = data.filter((item) => item.list === "later");
+            const today = data.filter((item) => item.list === "today");
+
+            setListenLater(later);
+            setListenToday(today);
+        } catch (error) {
+            console.error("Error fetching lists:", error);
+        }
+    };
+
+    const value = { addToList, listenLater, listenToday };
 
     return <ListContext.Provider value={value}>{children}</ListContext.Provider>;
 };

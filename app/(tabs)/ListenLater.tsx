@@ -1,13 +1,19 @@
-import { Stack } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Stack } from "expo-router";
+import { Text } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useList } from "~/context/List";
 
 const ListenLater = () => {
-  return (
-    <>
-      <Stack.Screen options={{ headerShown: false }} />
-      <SafeAreaView className="flex flex-1 bg-neutral-900"></SafeAreaView>
-    </>
-  );
+    const { listenLater } = useList();
+
+    return (
+        <>
+            <Stack.Screen options={{ headerShown: false }} />
+            <SafeAreaView className="flex flex-1 bg-neutral-900">
+                <Text>{JSON.stringify(listenLater)}</Text>
+            </SafeAreaView>
+        </>
+    );
 };
 
 export default ListenLater;

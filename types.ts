@@ -1,6 +1,10 @@
 import { AuthRequestPromptOptions, AuthSessionResult } from "expo-auth-session";
 
-export type ListContextType = {addToList: (item: SpotifyItem, list: "later" | "today") => Promise<void>}
+export type ListContextType = {
+    addToList: (item: SpotifyItem, list: "later" | "today") => Promise<void>;
+    listenLater: SpotifyItem[]
+    listenToday: SpotifyItem[]
+};
 
 export type SpotifyContextType = {
     request: any;
