@@ -67,7 +67,24 @@ export const ListProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
-    const value = { addToList, listenLater, listenToday };
+    const removeFromList = async (item: SpotifyItem, list: "later" | "today") => {
+        try {
+            if (list === "later") {
+                setListenLater((prev) => prev.filter((i) => i.uri !== item.uri));
+            } else {
+                setListenToday((prev) => prev.filter((i) => i.uri !== item.uri));
+            }
+
+            await supabase
+                .from("items")
+                .delete()
+                .eq("user_id", user.id)
+                .eq("uri", item.uri)
+                .eq("list", list);
+        } catch (error) {}
+    };
+
+    const value = { addToList, listenLater, listenToday, removeFromList };
 
     return <ListContext.Provider value={value}>{children}</ListContext.Provider>;
 };

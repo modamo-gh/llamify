@@ -1,6 +1,7 @@
 import { FontAwesome } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { Stack } from "expo-router";
+import { useState } from "react";
 import { FlatList, Image, Pressable, Text, View } from "react-native";
 import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import Animated, {
@@ -12,15 +13,20 @@ import Animated, {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useList } from "~/context/List";
 import { useSpotify } from "~/context/Spotify";
+import { SpotifyItem } from "~/types";
 
 const ListenToday = () => {
-    const { listenToday } = useList();
+    const { listenToday, removeFromList } = useList();
 
     const { user } = useSpotify();
 
     const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-    const renderLeft = (progress: SharedValue<number>, dragX: SharedValue<number>) => {
+    const renderLeft = (
+        progress: SharedValue<number>,
+        dragX: SharedValue<number>,
+        item: SpotifyItem
+    ) => {
         const animatedStyle = useAnimatedStyle(() => ({
             transform: [
                 {
@@ -37,8 +43,10 @@ const ListenToday = () => {
         return (
             <AnimatedPressable
                 className="flex w-[100px] items-center justify-center bg-red-500 active:opacity-80"
-                onPress={() => {
+                onPress={async () => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+                    await removeFromList(item, "today");
                 }}
                 style={animatedStyle}>
                 <Text className="text-xl text-zinc-50">Delete</Text>
@@ -64,7 +72,7 @@ const ListenToday = () => {
                         renderItem={({ item }) => (
                             <Swipeable
                                 overshootLeft={false}
-                                renderLeftActions={renderLeft}
+                                renderLeftActions={(progress, dragX) => renderLeft(progress, dragX, item)}
                                 renderRightActions={(progress, dragX, swipeable) => null}>
                                 <View className="flex h-[96px] w-full flex-row items-center gap-2 rounded-lg bg-neutral-800 p-2 shadow-lg">
                                     <Image

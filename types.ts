@@ -2,8 +2,9 @@ import { AuthRequestPromptOptions, AuthSessionResult } from "expo-auth-session";
 
 export type ListContextType = {
     addToList: (item: SpotifyItem, list: "later" | "today") => Promise<void>;
-    listenLater: SpotifyItem[]
-    listenToday: SpotifyItem[]
+    listenLater: SpotifyItem[];
+    listenToday: SpotifyItem[];
+    removeFromList: (item: SpotifyItem, list: "later" | "today") => Promise<void>;
 };
 
 export type SpotifyContextType = {
@@ -17,6 +18,7 @@ export type SpotifyContextType = {
 
 export type SpotifyItem = {
     imageURL: string;
+    list?: "later" | "today";
     name: string;
     type: string;
     uri: string;
