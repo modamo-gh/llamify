@@ -12,10 +12,6 @@ export const ListProvider = ({ children }: { children: ReactNode }) => {
     const [listenToday, setListenToday] = useState<SpotifyItem[]>([]);
 
     const addToList = async (item: SpotifyItem, list: "later" | "today") => {
-        console.log("User:", user?.id);
-        console.log("Item:", item);
-        console.log(process.env.EXPO_PUBLIC_SUPABASE_URL);
-
         if (list === "later") {
             setListenLater((prev) => [...prev, item]);
         } else {
