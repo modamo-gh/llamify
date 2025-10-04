@@ -1,7 +1,7 @@
 import { FontAwesome } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { Stack } from "expo-router";
-import { FlatList, Image, Pressable, Text, View } from "react-native";
+import { FlatList, Image, Linking, Pressable, Text, View } from "react-native";
 import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import Animated, {
     Extrapolation,
@@ -91,8 +91,28 @@ const ListenToday = () => {
                                     </View>
                                     <Pressable
                                         className="active:opacity-80"
-                                        onPress={() => {
+                                        onPress={async () => {
                                             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+                                            try {
+                                                const canOpen = await Linking.canOpenURL(item.uri);
+
+                                                if (canOpen) {
+                                                    await Linking.openURL(item.uri);
+                                                } else {
+                                                    await Linking.openURL(
+                                                        item.uri
+                                                            .split(":")
+                                                            .join("/")
+                                                            .replace(
+                                                                "spotify",
+                                                                "https://open.spotify.com"
+                                                            )
+                                                    );
+                                                }
+                                            } catch (error) {
+                                                console.error("Error opening Spotify:", error);
+                                            }
                                         }}>
                                         <View className="flex h-12 w-12 items-center justify-center rounded-full bg-green-500">
                                             <FontAwesome name="play" size={20} />
