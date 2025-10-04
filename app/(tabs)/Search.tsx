@@ -18,7 +18,7 @@ import { useSpotify } from "~/context/Spotify";
 import { SpotifyItem } from "~/types";
 
 const Search = () => {
-    const { addToList } = useList();
+    const { addToList, listenLater, listenToday } = useList();
 
     const snapPoints = useMemo(() => ["25%"], []);
 
@@ -26,6 +26,8 @@ const Search = () => {
 
     const { token, user } = useSpotify();
 
+    const [inListenLater, setInListenLater] = useState(false);
+    const [inListenToday, setInListenToday] = useState(false);
     const [searchResults, setSearchResults] = useState<SpotifyItem[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedItem, setSelectedItem] = useState<null | SpotifyItem>(null);
@@ -147,8 +149,18 @@ const Search = () => {
                                 className="active:opacity-80"
                                 onPress={() => {
                                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
                                     setSelectedItem(item);
-                                    setShowBottomSheet(true);
+
+                                    const ilt = listenToday.some((i) => i.uri === item.uri);
+                                    const ill = listenLater.some((i) => i.uri === item.uri);
+
+                                    setInListenToday(ilt);
+                                    setInListenLater(ill);
+
+                                    if (!ill || !ilt) {
+                                        setShowBottomSheet(true);
+                                    }
                                 }}>
                                 <View
                                     className="flex gap-2 rounded-lg bg-neutral-800 p-2 shadow-lg"
@@ -188,7 +200,9 @@ const Search = () => {
 
                                     ref.current?.close();
                                 }}>
-                                <Text className="text-xl font-bold text-zinc-50">Listen Today</Text>
+                                <Text className="text-xl font-bold text-zinc-50">
+                                    {inListenToday && "Already in "}Listen Today
+                                </Text>
                             </Pressable>
                             <Pressable
                                 className="flex w-full items-center justify-center"
@@ -200,13 +214,15 @@ const Search = () => {
 
                                     ref.current?.close();
                                 }}>
-                                <Text className="text-xl font-bold text-zinc-50">Listen Later</Text>
+                                <Text className="text-xl font-bold text-zinc-50">
+                                    {inListenLater && "Already in "}Listen Later
+                                </Text>
                             </Pressable>
                             <Pressable
                                 className="flex w-full items-center justify-center"
                                 onPress={() => {
                                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                                    
+
                                     ref.current?.close();
                                 }}
                                 style={{ height: bottomSheetOptionHeight }}>
