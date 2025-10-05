@@ -129,7 +129,11 @@ const Search = () => {
                             }
                         }}
                         onEndEditing={() => Keyboard.dismiss()}
-                        onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)}
+                        onPress={() => {
+                            ref.current?.close();
+                            setShowBottomSheet(false);
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                        }}
                         placeholder="Enter a search term or Spotify URL"
                         placeholderTextColor="#7D7D7D"
                         value={searchTerm}
@@ -139,8 +143,9 @@ const Search = () => {
                         source={{ uri: user?.images?.[0]?.url }}
                     />
                 </View>
-                <View
-                    className={`${!searchResults.length && "items-center justify-center"} flex w-full flex-[9] p-4`}>
+                <Pressable
+                    className={`${!searchResults.length && "items-center justify-center"} flex w-full flex-[9] p-4`}
+                    onPress={() => Keyboard.dismiss()}>
                     {searchResults.length ? (
                         <FlatList
                             className="w-full flex-1"
@@ -200,7 +205,7 @@ const Search = () => {
                     ) : (
                         <Text className="text-xl text-zinc-50">Search for Items above</Text>
                     )}
-                </View>
+                </Pressable>
                 {showBottomSheet && (
                     <BottomSheet
                         backgroundStyle={{ backgroundColor: "#22C55E" }}
