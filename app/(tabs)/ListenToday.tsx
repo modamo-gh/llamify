@@ -61,7 +61,7 @@ const ListenToday = () => {
                     <View className="flex flex-1 flex-row items-center justify-around">
                     <Pressable
                             className="active:opacity-80"
-                            disabled={listenToday.length > 0}
+                            disabled={listenToday.length === 0}
                             onPress={() => {
                                 if (listenToday.length) {
                                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -73,7 +73,7 @@ const ListenToday = () => {
                         </Pressable>
                         <Pressable
                             className="active:opacity-80"
-                            disabled={listenToday.length > 0}
+                            disabled={listenToday.length === 0}
                             onPress={() => {
                                 if (listenToday.length) {
                                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);

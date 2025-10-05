@@ -61,7 +61,7 @@ const ListenLater = () => {
                     <View className="flex flex-1 flex-row items-center justify-around">
                         <Pressable
                             className="active:opacity-80"
-                            disabled={listenLater.length > 0}
+                            disabled={listenLater.length === 0}
                             onPress={() => {
                                 console.log(listenLater)
                                 if (listenLater.length) {
@@ -74,7 +74,7 @@ const ListenLater = () => {
                         </Pressable>
                         <Pressable
                             className="active:opacity-80"
-                            disabled={listenLater.length > 0}
+                            disabled={listenLater.length === 0}
                             onPress={() => {
                                 if (listenLater.length) {
                                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
