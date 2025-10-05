@@ -72,7 +72,7 @@ const Search = () => {
                                     ({
                                         imageURL:
                                             item?.album?.images?.[0]?.url ||
-                                            "../../assets/playstore.png",
+                                            "https://placehold.co/400x400/1DB954/FFFFFF/png?text=No+Image",
                                         name: item.name || "",
                                         type,
                                         uri: item.uri,
@@ -84,7 +84,8 @@ const Search = () => {
                             ...data[type]?.items?.filter(Boolean).map((item) => {
                                 return {
                                     imageURL:
-                                        item?.images?.[0]?.url || "../../assets/playstore.png",
+                                        item?.images?.[0]?.url ||
+                                        "https://placehold.co/400x400/22C55E/FAFAFA/png?text=No+Image",
                                     name: item?.name || "",
                                     type,
                                     uri: item.uri,
@@ -128,6 +129,7 @@ const Search = () => {
                             }
                         }}
                         onEndEditing={() => Keyboard.dismiss()}
+                        onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)}
                         placeholder="Enter a search term or Spotify URL"
                         placeholderTextColor="#7D7D7D"
                         value={searchTerm}

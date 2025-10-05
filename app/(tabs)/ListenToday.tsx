@@ -59,7 +59,7 @@ const ListenToday = () => {
             <SafeAreaView className="flex flex-1 bg-neutral-900" edges={["top"]}>
                 <View className="flex w-full flex-1 flex-row gap-4 px-4">
                     <View className="flex flex-1 flex-row items-center justify-around">
-                    <Pressable
+                        <Pressable
                             className="active:opacity-80"
                             disabled={listenToday.length === 0}
                             onPress={() => {
