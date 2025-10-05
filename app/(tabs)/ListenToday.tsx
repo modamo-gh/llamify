@@ -59,16 +59,26 @@ const ListenToday = () => {
             <SafeAreaView className="flex flex-1 bg-neutral-900" edges={["top"]}>
                 <View className="flex w-full flex-1 flex-row gap-4 px-4">
                     <View className="flex flex-1 flex-row items-center justify-around">
-                        <Pressable
+                    <Pressable
                             className="active:opacity-80"
-                            onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)}>
+                            disabled={listenToday.length > 0}
+                            onPress={() => {
+                                if (listenToday.length) {
+                                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                                }
+                            }}>
                             <View className="flex h-12 w-[72px] items-center justify-center rounded-lg bg-neutral-800">
                                 <Text className="text-xl text-zinc-50">Filter</Text>
                             </View>
                         </Pressable>
                         <Pressable
                             className="active:opacity-80"
-                            onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)}>
+                            disabled={listenToday.length > 0}
+                            onPress={() => {
+                                if (listenToday.length) {
+                                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                                }
+                            }}>
                             <View className="flex h-12 w-[72px] items-center justify-center rounded-lg bg-neutral-800">
                                 <Text className="text-xl text-zinc-50">Sort</Text>
                             </View>

@@ -138,7 +138,7 @@ const Search = () => {
                     />
                 </View>
                 <View
-                    className={`${!listenLater.length && "items-center justify-center"} flex w-full flex-[9] p-4`}>
+                    className={`${!searchResults.length && "items-center justify-center"} flex w-full flex-[9] p-4`}>
                     {searchResults.length ? (
                         <FlatList
                             className="w-full flex-1"

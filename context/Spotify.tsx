@@ -96,6 +96,7 @@ export const SpotifyProvider = ({ children }: { children: ReactNode }) => {
                 const userData = await userResponse.json();
 
                 setUser(userData);
+
                 await AsyncStorage.setItem("llamify_user", JSON.stringify(userData));
 
                 await supabase.from("users").upsert({ id: userData.id });
