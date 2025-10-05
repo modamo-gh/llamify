@@ -63,7 +63,7 @@ const ListenLater = () => {
                             className="active:opacity-80"
                             disabled={listenLater.length === 0}
                             onPress={() => {
-                                console.log(listenLater)
+                                console.log(listenLater);
                                 if (listenLater.length) {
                                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                                 }
@@ -99,6 +99,12 @@ const ListenLater = () => {
                             data={listenLater}
                             renderItem={({ item }) => (
                                 <Swipeable
+                                    onSwipeableCloseStartDrag={() =>
+                                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+                                    }
+                                    onSwipeableOpenStartDrag={() =>
+                                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+                                    }
                                     overshootLeft={false}
                                     renderLeftActions={(progress, dragX) =>
                                         renderLeft(progress, dragX, item)

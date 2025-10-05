@@ -97,6 +97,12 @@ const ListenToday = () => {
                             data={listenToday}
                             renderItem={({ item }) => (
                                 <Swipeable
+                                    onSwipeableCloseStartDrag={() =>
+                                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+                                    }
+                                    onSwipeableOpenStartDrag={() =>
+                                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+                                    }
                                     overshootLeft={false}
                                     renderLeftActions={(progress, dragX) =>
                                         renderLeft(progress, dragX, item)
