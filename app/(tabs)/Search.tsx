@@ -137,62 +137,67 @@ const Search = () => {
                         source={{ uri: user?.images?.[0]?.url }}
                     />
                 </View>
-                <View className="flex w-full flex-[9] p-4">
-                    <FlatList
-                        className="w-full flex-1"
-                        columnWrapperClassName="gap-4"
-                        contentContainerClassName="gap-4"
-                        data={searchResults}
-                        keyExtractor={(item, index) => `${index}`}
-                        numColumns={2}
-                        renderItem={({ item }) => (
-                            <Pressable
-                                className="active:opacity-80"
-                                onPress={() => {
-                                    setSelectedItem(item);
+                <View
+                    className={`${!listenLater.length && "items-center justify-center"} flex w-full flex-[9] p-4`}>
+                    {searchResults.length ? (
+                        <FlatList
+                            className="w-full flex-1"
+                            columnWrapperClassName="gap-4"
+                            contentContainerClassName="gap-4"
+                            data={searchResults}
+                            keyExtractor={(item, index) => `${index}`}
+                            numColumns={2}
+                            renderItem={({ item }) => (
+                                <Pressable
+                                    className="active:opacity-80"
+                                    onPress={() => {
+                                        setSelectedItem(item);
 
-                                    const ilt = listenToday.some((i) => i.uri === item.uri);
-                                    const ill = listenLater.some((i) => i.uri === item.uri);
+                                        const ilt = listenToday.some((i) => i.uri === item.uri);
+                                        const ill = listenLater.some((i) => i.uri === item.uri);
 
-                                    if (!ill || !ilt) {
-                                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                                    } else {
-                                        Haptics.notificationAsync(
-                                            Haptics.NotificationFeedbackType.Error
-                                        );
+                                        if (!ill || !ilt) {
+                                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                                        } else {
+                                            Haptics.notificationAsync(
+                                                Haptics.NotificationFeedbackType.Error
+                                            );
 
-                                        Toast.show({
-                                            backgroundColor: "#262626",
-                                            position: "bottom",
-                                            progressBarColor: "#EF4444",
-                                            textColor: "#FAFAFA",
-                                            text1: "Item exists in both lists already",
-                                            type: "error",
-                                        });
-                                    }
+                                            Toast.show({
+                                                backgroundColor: "#262626",
+                                                position: "bottom",
+                                                progressBarColor: "#EF4444",
+                                                textColor: "#FAFAFA",
+                                                text1: "Item exists in both lists already",
+                                                type: "error",
+                                            });
+                                        }
 
-                                    setShowBottomSheet(!ill || !ilt);
-                                    setInListenToday(ilt);
-                                    setInListenLater(ill);
-                                }}>
-                                <View
-                                    className="flex gap-2 rounded-lg bg-neutral-800 p-2 shadow-lg"
-                                    style={{ width: imageDimension }}>
-                                    <Image
-                                        className="aspect-square w-full rounded-lg"
-                                        source={{ uri: item.imageURL }}
-                                    />
-                                    <Text className="text-zinc-50" numberOfLines={1}>
-                                        {item.name}
-                                    </Text>
-                                    <Text className="text-zinc-50/80">
-                                        {item.type[0].toUpperCase()}
-                                        {item.type.slice(1, item.type.length - 1)}
-                                    </Text>
-                                </View>
-                            </Pressable>
-                        )}
-                    />
+                                        setShowBottomSheet(!ill || !ilt);
+                                        setInListenToday(ilt);
+                                        setInListenLater(ill);
+                                    }}>
+                                    <View
+                                        className="flex gap-2 rounded-lg bg-neutral-800 p-2 shadow-lg"
+                                        style={{ width: imageDimension }}>
+                                        <Image
+                                            className="aspect-square w-full rounded-lg"
+                                            source={{ uri: item.imageURL }}
+                                        />
+                                        <Text className="text-zinc-50" numberOfLines={1}>
+                                            {item.name}
+                                        </Text>
+                                        <Text className="text-zinc-50/80">
+                                            {item.type[0].toUpperCase()}
+                                            {item.type.slice(1, item.type.length - 1)}
+                                        </Text>
+                                    </View>
+                                </Pressable>
+                            )}
+                        />
+                    ) : (
+                        <Text className="text-xl text-zinc-50">Search for Items above</Text>
+                    )}
                 </View>
                 {showBottomSheet && (
                     <BottomSheet
