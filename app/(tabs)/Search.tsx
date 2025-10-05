@@ -17,6 +17,7 @@ import { useList } from "~/context/List";
 import { useSpotify } from "~/context/Spotify";
 import { SpotifyItem } from "~/types";
 import ToastManager, { Toast } from "toastify-react-native";
+import { Feather } from "@expo/vector-icons";
 
 const Search = () => {
     const { addToList, listenLater, listenToday } = useList();
@@ -117,27 +118,41 @@ const Search = () => {
             <Stack.Screen options={{ headerShown: false }} />
             <SafeAreaView className="flex flex-1 bg-neutral-900" edges={["top"]}>
                 <View className="flex w-full flex-1 flex-row gap-4 px-4">
-                    <TextInput
-                        className="flex-1 rounded-lg border border-green-500 px-2 text-zinc-50"
-                        onChangeText={(term) => {
-                            setSearchTerm(term);
+                    <View className="flex flex-1 flex-row items-center rounded-lg border border-green-500 px-2 text-zinc-50">
+                        <TextInput
+                            className="flex-1 text-zinc-50"
+                            onChangeText={(term) => {
+                                setSearchTerm(term);
 
-                            if (term.length) {
-                                getDebouncedResults(term);
-                            } else {
-                                setSearchResults([]);
-                            }
-                        }}
-                        onEndEditing={() => Keyboard.dismiss()}
-                        onPress={() => {
-                            ref.current?.close();
-                            setShowBottomSheet(false);
-                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                        }}
-                        placeholder="Enter a search term or Spotify URL"
-                        placeholderTextColor="#7D7D7D"
-                        value={searchTerm}
-                    />
+                                if (term.length) {
+                                    getDebouncedResults(term);
+                                } else {
+                                    setSearchResults([]);
+                                }
+                            }}
+                            onEndEditing={() => Keyboard.dismiss()}
+                            onPress={() => {
+                                ref.current?.close();
+                                setShowBottomSheet(false);
+                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                            }}
+                            placeholder="Enter a search term or Spotify URL"
+                            placeholderTextColor="#7D7D7D"
+                            value={searchTerm}
+                        />
+                        {searchTerm.length && (
+                            <Pressable
+                                className="flex h-12 w-12 items-center justify-center"
+                                onPress={() => {
+                                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+                                    setSearchTerm("");
+                                    setSearchResults([]);
+                                }}>
+                                <Feather color="#FAFAFA" name="x" size={20} />
+                            </Pressable>
+                        )}
+                    </View>
                     <Image
                         className="aspect-square max-h-full max-w-full rounded-lg"
                         source={{ uri: user?.images?.[0]?.url }}

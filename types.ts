@@ -8,18 +8,17 @@ export type ListContextType = {
 };
 
 export type SpotifyContextType = {
-    request: any;
-    refreshAccessToken: () => Promise<void>;
-    promptAsync: (options?: AuthRequestPromptOptions) => Promise<AuthSessionResult>;
-    token: string | null;
     isAuthenticated: boolean;
-    user: any;
     loading: boolean;
+    promptAsync: (options?: AuthRequestPromptOptions) => Promise<AuthSessionResult>;
+    refreshAccessToken: () => Promise<void>;
+    request: any;
+    token: string | null;
+    user: any;
 };
 
 export type SpotifyItem = {
     imageURL: string;
-    list?: "later" | "today";
     name: string;
     type: string;
     uri: string;
