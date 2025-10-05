@@ -42,11 +42,11 @@ export const SpotifyProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         const loadStoredAuth = async () => {
             try {
-                const savedToken = await AsyncStorage.getItem("llamify_token");
+                const savedAccessToken = await AsyncStorage.getItem("llamify_access_token");
                 const savedUser = await AsyncStorage.getItem("llamify_user");
 
-                if (savedToken) {
-                    setToken(savedToken);
+                if (savedAccessToken) {
+                    setToken(savedAccessToken);
                 }
 
                 if (savedUser) {
@@ -66,6 +66,21 @@ export const SpotifyProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [response]);
 
+    useEffect(() => {
+        if (!token) {
+            return;
+        }
+
+        const interval = setInterval(
+            () => {
+                refreshAccessToken();
+            },
+            48 * 60 * 1000
+        );
+
+        return () => clearInterval(interval);
+    }, [token]);
+
     const exchangeCodeForToken = async (code: string) => {
         setLoading(true);
 
@@ -82,10 +97,13 @@ export const SpotifyProvider = ({ children }: { children: ReactNode }) => {
 
             const tokenData = await tokenResponse.json();
             const accessToken = tokenData.access_token;
+            const refreshToken = tokenData.refresh_token;
 
             if (accessToken) {
                 setToken(accessToken);
-                await AsyncStorage.setItem("llamify_token", accessToken);
+
+                await AsyncStorage.setItem("llamify_access_token", accessToken);
+                await AsyncStorage.setItem("llamify_refresh_token", refreshToken);
 
                 const userResponse = await fetch("https://api.spotify.com/v1/me", {
                     headers: {
@@ -108,7 +126,46 @@ export const SpotifyProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
-    const value = { isAuthenticated: !!token, loading, request, promptAsync, token, user };
+    const refreshAccessToken = async () => {
+        try {
+            const refreshToken = await AsyncStorage.getItem("llamify_refresh_token");
+
+            if (!refreshToken) {
+                setToken(null);
+
+                return;
+            }
+
+            const response = await fetch("https://accounts.spotify.com/api/token", {
+                body: `grant_type=refresh_token&refresh_token=${refreshToken}&client_id=${process.env.EXPO_PUBLIC_SPOTIFY_CLIENT_ID}`,
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                method: "POST",
+            });
+            const data = await response.json();
+
+            if (data.access_token) {
+                setToken(data.access_token);
+
+                await AsyncStorage.setItem("llamify_access_token", data.access_token);
+            } else {
+                setToken(null);
+
+                await AsyncStorage.multiRemove(["llamify_access_token", "llamify_refresh_token"]);
+            }
+        } catch (error) {
+            console.error("Token refresh failed:", error);
+        }
+    };
+
+    const value = {
+        isAuthenticated: !!token,
+        loading,
+        refreshAccessToken,
+        request,
+        promptAsync,
+        token,
+        user,
+    };
 
     return <SpotifyContext.Provider value={value}>{children}</SpotifyContext.Provider>;
 };

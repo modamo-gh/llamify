@@ -9,6 +9,7 @@ export type ListContextType = {
 
 export type SpotifyContextType = {
     request: any;
+    refreshAccessToken: () => Promise<void>;
     promptAsync: (options?: AuthRequestPromptOptions) => Promise<AuthSessionResult>;
     token: string | null;
     isAuthenticated: boolean;
