@@ -44,9 +44,14 @@ export const SpotifyProvider = ({ children }: { children: ReactNode }) => {
             try {
                 const savedAccessToken = await AsyncStorage.getItem("llamify_access_token");
                 const savedUser = await AsyncStorage.getItem("llamify_user");
+                const expiresAt = await AsyncStorage.getItem("llamify_expires_at");
 
                 if (savedAccessToken) {
-                    setToken(savedAccessToken);
+                    if (!expiresAt || Date.now() > parseInt(expiresAt)) {
+                        await refreshAccessToken();
+                    } else {
+                        setToken(savedAccessToken);
+                    }
                 }
 
                 if (savedUser) {
@@ -102,7 +107,10 @@ export const SpotifyProvider = ({ children }: { children: ReactNode }) => {
             if (accessToken) {
                 setToken(accessToken);
 
+                const expiresAt = Date.now() + 3600 * 1000;
+
                 await AsyncStorage.setItem("llamify_access_token", accessToken);
+                await AsyncStorage.setItem("llamify_expires_at", expiresAt.toString());
                 await AsyncStorage.setItem("llamify_refresh_token", refreshToken);
 
                 const userResponse = await fetch("https://api.spotify.com/v1/me", {
@@ -144,9 +152,12 @@ export const SpotifyProvider = ({ children }: { children: ReactNode }) => {
             const data = await response.json();
 
             if (data.access_token) {
+                const expiresAt = Date.now() + 3600 * 1000;
+
                 setToken(data.access_token);
 
                 await AsyncStorage.setItem("llamify_access_token", data.access_token);
+                await AsyncStorage.setItem("llamify_expires_at", expiresAt.toString());
             } else {
                 setToken(null);
 
