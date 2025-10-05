@@ -31,7 +31,7 @@ export const SpotifyProvider = ({ children }: { children: ReactNode }) => {
                 "playlist-read-private",
                 "playlist-read-collaborative",
             ],
-            usePKCE: false,
+            usePKCE: true,
             redirectUri: makeRedirectUri({
                 scheme: "llamify",
             }),
@@ -77,7 +77,7 @@ export const SpotifyProvider = ({ children }: { children: ReactNode }) => {
                 },
                 body: `grant_type=authorization_code&code=${code}&redirect_uri=${makeRedirectUri({
                     scheme: "llamify",
-                })}&client_id=${process.env.EXPO_PUBLIC_SPOTIFY_CLIENT_ID}&client_secret=${process.env.EXPO_PUBLIC_SPOTIFY_CLIENT_SECRET}`,
+                })}&client_id=${process.env.EXPO_PUBLIC_SPOTIFY_CLIENT_ID}&code_verifier=${request?.codeVerifier}`,
             });
 
             const tokenData = await tokenResponse.json();
