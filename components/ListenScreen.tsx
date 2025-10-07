@@ -1,6 +1,7 @@
 import { FontAwesome } from "@expo/vector-icons";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Checkbox } from "expo-checkbox";
 import * as Haptics from "expo-haptics";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Dimensions, FlatList, Image, Linking, Pressable, Text, View } from "react-native";
@@ -24,6 +25,17 @@ const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
 
     const { user } = useSpotify();
 
+    const [filters, setFilters] = useState<Map<string, boolean>>(
+        new Map([
+            ["Albums", true],
+            ["Artists", true],
+            ["Audiobooks", true],
+            ["Episodes", true],
+            ["Playlists", true],
+            ["Shows", true],
+            ["Tracks", true],
+        ])
+    );
     const [mode, setMode] = useState<Mode>("");
     const [showBottomSheet, setBottomSheet] = useState(false);
 
@@ -37,7 +49,7 @@ const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
 
                 if (!JSON.parse(hasBeenPrompted)) {
                     setMode("prompt");
-                    setBottomSheet(true)
+                    setBottomSheet(true);
 
                     await AsyncStorage.setItem("llamify_hasBeenPrompted", "true");
                 }
@@ -46,6 +58,7 @@ const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
 
         migrateListenToday();
     }, []);
+
     const bottomSheetOptionHeight = Dimensions.get("window").height / 15;
 
     const displayBottomSheet = (mode: Mode) => {
@@ -61,12 +74,42 @@ const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
                         ref={ref}
                         snapPoints={snapPoints}>
                         <BottomSheetView className="bg-green-500">
-                            <Pressable
-                                className="flex w-full items-center justify-center "
-                                style={{ height: bottomSheetOptionHeight }}
-                                onPress={() => {}}>
-                                <Text className="text-xl font-bold text-zinc-50"></Text>
-                            </Pressable>
+                            {[...filters.keys()].map((key) => (
+                                <Pressable
+                                    className="flex h-12 w-full flex-row items-center"
+                                    key={key}
+                                    style={{ height: bottomSheetOptionHeight }}
+                                    onPress={() =>
+                                        setFilters((prev) => {
+                                            const f = new Map(prev);
+
+                                            f.set(key, !f.get(key));
+
+                                            return f;
+                                        })
+                                    }>
+                                    <View className="flex flex-1 items-center">
+                                        <Checkbox
+                                            color={filters.get(key) ? "#262626" : ""}
+                                            onValueChange={() =>
+                                                setFilters((prev) => {
+                                                    const f = new Map(prev);
+
+                                                    f.set(key, !f.get(key));
+
+                                                    return f;
+                                                })
+                                            }
+                                            value={filters.get(key)}
+                                        />
+                                    </View>
+                                    <View className="flex flex-1 items-center">
+                                        <Text className="text-xl font-bold text-zinc-50">
+                                            {key}
+                                        </Text>
+                                    </View>
+                                </Pressable>
+                            ))}
                         </BottomSheetView>
                     </BottomSheet>
                 );
@@ -200,7 +243,9 @@ const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
                 {list.length ? (
                     <FlatList
                         contentContainerClassName="gap-4"
-                        data={list}
+                        data={list.filter((item) =>
+                            filters.get(`${item.type[0].toUpperCase()}${item.type.slice(1)}`)
+                        )}
                         renderItem={({ item }) => (
                             <Swipeable
                                 onSwipeableCloseStartDrag={() =>
