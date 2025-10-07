@@ -7,6 +7,8 @@ export type ListContextType = {
     removeFromList: (item: SpotifyItem, list: "later" | "today") => Promise<void>;
 };
 
+export type Mode = "" | "filter" | "prompt" | "sort";
+
 export type SpotifyContextType = {
     isAuthenticated: boolean;
     loading: boolean;
@@ -19,6 +21,7 @@ export type SpotifyContextType = {
 
 export type SpotifyItem = {
     imageURL: string;
+    list: "later" | "today";
     name: string;
     type: string;
     uri: string;

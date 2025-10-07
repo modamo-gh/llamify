@@ -118,7 +118,7 @@ const Search = () => {
             <Stack.Screen options={{ headerShown: false }} />
             <SafeAreaView className="flex flex-1 bg-neutral-900" edges={["top"]}>
                 <View className="flex w-full flex-1 flex-row gap-4 px-4">
-                    <View className="flex flex-1 flex-row items-center rounded-lg border border-green-500 px-2 text-zinc-50">
+                    <View className="flex flex-1 flex-row items-center rounded-lg border border-green-500 px-2">
                         <TextInput
                             className="flex-1 text-zinc-50"
                             onChangeText={(term) => {

@@ -1,7 +1,8 @@
 import { FontAwesome } from "@expo/vector-icons";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Haptics from "expo-haptics";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Dimensions, FlatList, Image, Linking, Pressable, Text, View } from "react-native";
 import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import Animated, {
@@ -12,20 +13,103 @@ import Animated, {
 } from "react-native-reanimated";
 import { useList } from "~/context/List";
 import { useSpotify } from "~/context/Spotify";
-import { SpotifyItem } from "~/types";
+import { Mode, SpotifyItem } from "~/types";
 
 const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
     const { removeFromList } = useList();
 
     const snapPoints = useMemo(() => ["25%"], []);
 
-    const filterRef = useRef<BottomSheet>(null);
-    const sortRef = useRef<BottomSheet>(null);
+    const ref = useRef<BottomSheet>(null);
 
     const { user } = useSpotify();
 
-    const [showFilterBottomSheet, setShowFilterBottomSheet] = useState(false);
-    const [showSortBottomSheet, setShowSortBottomSheet] = useState(false);
+    const [mode, setMode] = useState<Mode>("");
+    const [showBottomSheet, setBottomSheet] = useState(false);
+
+    useEffect(() => {
+        const migrateListenToday = async () => {
+            // await AsyncStorage.removeItem("llamify_hasBeenPrompted");
+
+            if (list.every((item) => item.list === "today")) {
+                const hasBeenPrompted =
+                    (await AsyncStorage.getItem("llamify_hasBeenPrompted")) || "false";
+
+                if (!JSON.parse(hasBeenPrompted)) {
+                    setMode("prompt");
+                    setBottomSheet(true)
+
+                    await AsyncStorage.setItem("llamify_hasBeenPrompted", "true");
+                }
+            }
+        };
+
+        migrateListenToday();
+    }, []);
+    const bottomSheetOptionHeight = Dimensions.get("window").height / 15;
+
+    const displayBottomSheet = (mode: Mode) => {
+        switch (mode) {
+            case "":
+            case "filter":
+                return (
+                    <BottomSheet
+                        backgroundStyle={{ backgroundColor: "#22C55E" }}
+                        enablePanDownToClose
+                        index={showBottomSheet ? 1 : -1}
+                        onClose={() => setBottomSheet(false)}
+                        ref={ref}
+                        snapPoints={snapPoints}>
+                        <BottomSheetView className="bg-green-500">
+                            <Pressable
+                                className="flex w-full items-center justify-center "
+                                style={{ height: bottomSheetOptionHeight }}
+                                onPress={() => {}}>
+                                <Text className="text-xl font-bold text-zinc-50"></Text>
+                            </Pressable>
+                        </BottomSheetView>
+                    </BottomSheet>
+                );
+            case "prompt":
+                return (
+                    <BottomSheet
+                        backgroundStyle={{ backgroundColor: "#22C55E" }}
+                        enablePanDownToClose
+                        index={showBottomSheet ? 1 : -1}
+                        onClose={() => setBottomSheet(false)}
+                        ref={ref}
+                        snapPoints={snapPoints}>
+                        <BottomSheetView className="bg-green-500">
+                            <Pressable
+                                className="flex w-full items-center justify-center "
+                                style={{ height: bottomSheetOptionHeight }}
+                                onPress={() => {}}>
+                                <Text className="text-xl font-bold text-zinc-50"></Text>
+                            </Pressable>
+                        </BottomSheetView>
+                    </BottomSheet>
+                );
+            case "sort":
+                return (
+                    <BottomSheet
+                        backgroundStyle={{ backgroundColor: "#22C55E" }}
+                        enablePanDownToClose
+                        index={showBottomSheet ? 1 : -1}
+                        onClose={() => setBottomSheet(false)}
+                        ref={ref}
+                        snapPoints={snapPoints}>
+                        <BottomSheetView className="bg-green-500">
+                            <Pressable
+                                className="flex w-full items-center justify-center "
+                                style={{ height: bottomSheetOptionHeight }}
+                                onPress={() => {}}>
+                                <Text className="text-xl font-bold text-zinc-50"></Text>
+                            </Pressable>
+                        </BottomSheetView>
+                    </BottomSheet>
+                );
+        }
+    };
 
     const renderLeft = (
         progress: SharedValue<number>,
@@ -61,8 +145,6 @@ const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
         );
     };
 
-    const bottomSheetOptionHeight = Dimensions.get("window").height / 15;
-
     return (
         <>
             <View className="flex w-full flex-1 flex-row gap-4 px-4">
@@ -74,9 +156,13 @@ const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
                             if (list.length) {
                                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
-                                sortRef.current?.close();
-                                setShowFilterBottomSheet(false);
-                                setShowFilterBottomSheet(true);
+                                setBottomSheet((prev) => {
+                                    if (prev) {
+                                        ref.current?.close();
+                                    }
+
+                                    return !prev;
+                                });
                             }
                         }}>
                         <View className="flex h-12 w-[72px] items-center justify-center rounded-lg bg-neutral-800">
@@ -90,9 +176,13 @@ const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
                             if (list.length) {
                                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
-                                filterRef.current?.close();
-                                setShowFilterBottomSheet(false);
-                                setShowSortBottomSheet(true);
+                                setBottomSheet((prev) => {
+                                    if (prev) {
+                                        ref.current?.close();
+                                    }
+
+                                    return !prev;
+                                });
                             }
                         }}>
                         <View className="flex h-12 w-[72px] items-center justify-center rounded-lg bg-neutral-800">
@@ -175,42 +265,7 @@ const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
                     <Text className="text-xl text-zinc-50">Add Items from the Search tab</Text>
                 )}
             </View>
-            {showFilterBottomSheet && (
-                <BottomSheet
-                    backgroundStyle={{ backgroundColor: "#22C55E" }}
-                    enablePanDownToClose
-                    index={showFilterBottomSheet ? 1 : -1}
-                    onClose={() => setShowFilterBottomSheet(false)}
-                    ref={filterRef}
-                    snapPoints={snapPoints}>
-                    <BottomSheetView className="bg-green-500">
-                        <Pressable
-                            className="flex w-full items-center justify-center "
-                            style={{ height: bottomSheetOptionHeight }}
-                            onPress={() => {}}>
-                            <Text className="text-xl font-bold text-zinc-50"></Text>
-                        </Pressable>
-                    </BottomSheetView>
-                </BottomSheet>
-            )}
-            {showSortBottomSheet && (
-                <BottomSheet
-                    backgroundStyle={{ backgroundColor: "#22C55E" }}
-                    enablePanDownToClose
-                    index={showSortBottomSheet ? 1 : -1}
-                    onClose={() => setShowSortBottomSheet(false)}
-                    ref={sortRef}
-                    snapPoints={snapPoints}>
-                    <BottomSheetView className="bg-green-500">
-                        <Pressable
-                            className="flex w-full items-center justify-center "
-                            style={{ height: bottomSheetOptionHeight }}
-                            onPress={() => {}}>
-                            <Text className="text-xl font-bold text-zinc-50"></Text>
-                        </Pressable>
-                    </BottomSheetView>
-                </BottomSheet>
-            )}
+            {showBottomSheet && displayBottomSheet(mode)}
         </>
     );
 };
