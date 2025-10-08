@@ -216,7 +216,7 @@ const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
                 onPress={async () => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
-                    await removeFromList(item, "today");
+                    await removeFromList(item, item.list);
                 }}
                 style={animatedStyle}>
                 <Text className="text-xl text-zinc-50">Delete</Text>
