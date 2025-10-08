@@ -25,6 +25,7 @@ const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
 
     const { user } = useSpotify();
 
+    const [displayList, setDisplayList] = useState<SpotifyItem[]>(list);
     const [filters, setFilters] = useState<Map<string, boolean>>(
         new Map([
             ["Albums", true],
@@ -59,8 +60,31 @@ const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
         migrateListenToday();
     }, []);
 
-    const bottomSheetOptionHeight = Dimensions.get("window").height / 15;
+    useEffect(() => {
+        setDisplayList(list);
+    }, [list]);
 
+    const bottomSheetOptionHeight = Dimensions.get("window").height / 15;
+    const sorts = [
+        { name: "Name", method: (a: SpotifyItem, b: SpotifyItem) => a.name.localeCompare(b.name) },
+        {
+            name: "Oldest First",
+            method: (a: SpotifyItem, b: SpotifyItem) =>
+                a.createdAt.getTime() - b.createdAt.getTime(),
+        },
+        {
+            name: "Newest First",
+            method: (a: SpotifyItem, b: SpotifyItem) =>
+                b.createdAt.getTime() - a.createdAt.getTime(),
+        },
+        {
+            name: "Type",
+            method: (a: SpotifyItem, b: SpotifyItem) =>
+                a.type.localeCompare(b.type) === 0
+                    ? a.name.localeCompare(b.name)
+                    : a.type.localeCompare(b.type),
+        },
+    ];
     const displayBottomSheet = (mode: Mode) => {
         switch (mode) {
             case "":
@@ -141,13 +165,25 @@ const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
                         onClose={() => setBottomSheet(false)}
                         ref={ref}
                         snapPoints={snapPoints}>
-                        <BottomSheetView className="bg-green-500">
-                            <Pressable
-                                className="flex w-full items-center justify-center "
-                                style={{ height: bottomSheetOptionHeight }}
-                                onPress={() => {}}>
-                                <Text className="text-xl font-bold text-zinc-50"></Text>
-                            </Pressable>
+                        <BottomSheetView className="flex items-center bg-green-500">
+                            <Text className="text-xl font-bold text-zinc-50">Sort by:</Text>
+                            {sorts.map((sort, index) => (
+                                <Pressable
+                                    className="flex w-full items-center justify-center"
+                                    key={index}
+                                    style={{ height: bottomSheetOptionHeight }}
+                                    onPress={() => {
+                                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+                                        setDisplayList((prev) => [...prev].sort(sort.method));
+
+                                        ref.current?.close();
+                                    }}>
+                                    <Text className="text-xl font-bold text-zinc-50">
+                                        {sort.name}
+                                    </Text>
+                                </Pressable>
+                            ))}
                         </BottomSheetView>
                     </BottomSheet>
                 );
@@ -199,6 +235,7 @@ const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
                             if (list.length) {
                                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
+                                setMode("filter");
                                 setBottomSheet((prev) => {
                                     if (prev) {
                                         ref.current?.close();
@@ -219,6 +256,7 @@ const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
                             if (list.length) {
                                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
+                                setMode("sort");
                                 setBottomSheet((prev) => {
                                     if (prev) {
                                         ref.current?.close();
@@ -243,7 +281,7 @@ const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
                 {list.length ? (
                     <FlatList
                         contentContainerClassName="gap-4"
-                        data={list.filter((item) =>
+                        data={displayList.filter((item) =>
                             filters.get(`${item.type[0].toUpperCase()}${item.type.slice(1)}`)
                         )}
                         renderItem={({ item }) => (

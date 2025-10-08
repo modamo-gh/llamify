@@ -48,6 +48,7 @@ export const ListProvider = ({ children }: { children: ReactNode }) => {
 
             const transformItem = (item) => {
                 return {
+                    createdAt: new Date(item.created_at),
                     imageURL: item.image_url,
                     list: item.list,
                     name: item.name,
@@ -59,6 +60,8 @@ export const ListProvider = ({ children }: { children: ReactNode }) => {
 
             const later = data.filter((item) => item.list === "later").map(transformItem);
             const today = data.filter((item) => item.list === "today").map(transformItem);
+
+            console.log(today)
 
             setListenLater(later);
             setListenToday(today);

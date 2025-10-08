@@ -20,6 +20,7 @@ export type SpotifyContextType = {
 };
 
 export type SpotifyItem = {
+    createdAt: Date;
     imageURL: string;
     list: "later" | "today";
     name: string;
