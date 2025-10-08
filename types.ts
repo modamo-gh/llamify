@@ -7,7 +7,10 @@ export type ListContextType = {
     removeFromList: (item: SpotifyItem, list: "later" | "today") => Promise<void>;
     setListenLater: React.Dispatch<React.SetStateAction<SpotifyItem[]>>;
     setListenToday: React.Dispatch<React.SetStateAction<SpotifyItem[]>>;
+    update: (item: SpotifyItem, newList: List) => Promise<void>;
 };
+
+export type List = "later" | "today";
 
 export type Mode = "" | "filter" | "prompt" | "sort";
 

@@ -17,7 +17,7 @@ import { useSpotify } from "~/context/Spotify";
 import { Mode, SpotifyItem } from "~/types";
 
 const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
-    const { removeFromList, setListenLater, setListenToday } = useList();
+    const { removeFromList, setListenLater, setListenToday, update } = useList();
 
     const snapPoints = useMemo(() => ["25%"], []);
 
@@ -312,6 +312,10 @@ const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
                                 );
                             }
 
+                            itemsToMove.forEach(
+                                async (item) =>
+                                    await update(item, item.list === "today" ? "later" : "today")
+                            );
                             setItemsToMove([]);
                         }}>
                         <Text className="text-xl text-zinc-50">Done</Text>

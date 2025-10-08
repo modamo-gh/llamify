@@ -1,5 +1,5 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
-import { ListContextType, SpotifyItem } from "~/types";
+import { List, ListContextType, SpotifyItem } from "~/types";
 import { supabase } from "~/utils/supabase";
 import { useSpotify } from "./Spotify";
 
@@ -70,7 +70,7 @@ export const ListProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
-    const removeFromList = async (item: SpotifyItem, list: "later" | "today") => {
+    const removeFromList = async (item: SpotifyItem, list: List) => {
         try {
             if (list === "later") {
                 setListenLater((prev) => prev.filter((i) => i.uri !== item.uri));
@@ -87,6 +87,16 @@ export const ListProvider = ({ children }: { children: ReactNode }) => {
         } catch (error) {}
     };
 
+    const update = async (item: SpotifyItem, newList: List) => {
+        try {
+            await supabase
+                .from("items")
+                .update({ list: newList })
+                .eq("user_id", user.id)
+                .eq("uri", item.uri);
+        } catch (error) {}
+    };
+
     const value = {
         addToList,
         listenLater,
@@ -94,6 +104,7 @@ export const ListProvider = ({ children }: { children: ReactNode }) => {
         removeFromList,
         setListenLater,
         setListenToday,
+        update
     };
 
     return <ListContext.Provider value={value}>{children}</ListContext.Provider>;
