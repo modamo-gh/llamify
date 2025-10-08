@@ -17,7 +17,7 @@ import { useSpotify } from "~/context/Spotify";
 import { Mode, SpotifyItem } from "~/types";
 
 const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
-    const { removeFromList } = useList();
+    const { removeFromList, setListenLater, setListenToday } = useList();
 
     const snapPoints = useMemo(() => ["25%"], []);
 
@@ -37,6 +37,8 @@ const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
             ["Tracks", true],
         ])
     );
+    const [isMoving, setIsMoving] = useState(false);
+    const [itemsToMove, setItemsToMove] = useState<SpotifyItem[]>([]);
     const [mode, setMode] = useState<Mode>("");
     const [showBottomSheet, setBottomSheet] = useState(false);
 
@@ -85,9 +87,9 @@ const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
                     : a.type.localeCompare(b.type),
         },
     ];
+
     const displayBottomSheet = (mode: Mode) => {
         switch (mode) {
-            case "":
             case "filter":
                 return (
                     <BottomSheet
@@ -137,25 +139,6 @@ const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
                         </BottomSheetView>
                     </BottomSheet>
                 );
-            case "prompt":
-                return (
-                    <BottomSheet
-                        backgroundStyle={{ backgroundColor: "#22C55E" }}
-                        enablePanDownToClose
-                        index={showBottomSheet ? 1 : -1}
-                        onClose={() => setBottomSheet(false)}
-                        ref={ref}
-                        snapPoints={snapPoints}>
-                        <BottomSheetView className="bg-green-500">
-                            <Pressable
-                                className="flex w-full items-center justify-center "
-                                style={{ height: bottomSheetOptionHeight }}
-                                onPress={() => {}}>
-                                <Text className="text-xl font-bold text-zinc-50"></Text>
-                            </Pressable>
-                        </BottomSheetView>
-                    </BottomSheet>
-                );
             case "sort":
                 return (
                     <BottomSheet
@@ -187,6 +170,8 @@ const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
                         </BottomSheetView>
                     </BottomSheet>
                 );
+            default:
+                return null;
         }
     };
 
@@ -256,6 +241,20 @@ const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
                             if (list.length) {
                                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
+                                setIsMoving((prev) => !prev);
+                            }
+                        }}>
+                        <View className="flex h-12 w-[72px] items-center justify-center rounded-lg bg-neutral-800">
+                            <Text className="text-xl text-zinc-50">Move</Text>
+                        </View>
+                    </Pressable>
+                    <Pressable
+                        className="active:opacity-80"
+                        disabled={list.length === 0}
+                        onPress={() => {
+                            if (list.length) {
+                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
                                 setMode("sort");
                                 setBottomSheet((prev) => {
                                     if (prev) {
@@ -277,7 +276,47 @@ const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
                 />
             </View>
             <View
-                className={`${!list.length && "items-center justify-center"} flex w-full flex-[9] p-4`}>
+                className={`${!list.length && "items-center justify-center"} flex w-full flex-[9] gap-4 p-4`}>
+                <View
+                    className={`${!isMoving ? "hidden" : "flex"} flex-row items-center justify-between`}>
+                    <Pressable
+                        className="flex min-h-12 flex-row items-center gap-4"
+                        onPress={() => {
+                            setItemsToMove((prev) => (prev.length ? [] : [...list]));
+                        }}>
+                        <Checkbox
+                            color={itemsToMove.length === list.length ? "#22C55E" : ""}
+                            onValueChange={() => {
+                                setItemsToMove((prev) => (prev.length ? [] : [...list]));
+                            }}
+                            value={itemsToMove.length === list.length}
+                        />
+                        <Text className="text-xl font-bold text-zinc-50">Move All</Text>
+                    </Pressable>
+                    <Pressable
+                        className="flex h-12 w-[72px] items-center justify-center rounded-lg bg-neutral-800 active:opacity-80"
+                        onPress={() => {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+                            setIsMoving((prev) => !prev);
+
+                            if (list.every((item) => item.list === "today")) {
+                                setListenLater((prev) => [...prev, ...itemsToMove]);
+                                setListenToday((prev) =>
+                                    prev.filter((item) => !itemsToMove.includes(item))
+                                );
+                            } else {
+                                setListenToday((prev) => [...prev, ...itemsToMove]);
+                                setListenLater((prev) =>
+                                    prev.filter((item) => !itemsToMove.includes(item))
+                                );
+                            }
+
+                            setItemsToMove([]);
+                        }}>
+                        <Text className="text-xl text-zinc-50">Done</Text>
+                    </Pressable>
+                </View>
                 {list.length ? (
                     <FlatList
                         contentContainerClassName="gap-4"
@@ -285,63 +324,86 @@ const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
                             filters.get(`${item.type[0].toUpperCase()}${item.type.slice(1)}`)
                         )}
                         renderItem={({ item }) => (
-                            <Swipeable
-                                onSwipeableCloseStartDrag={() =>
-                                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
-                                }
-                                onSwipeableOpenStartDrag={() =>
-                                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
-                                }
-                                overshootLeft={false}
-                                renderLeftActions={(progress, dragX) =>
-                                    renderLeft(progress, dragX, item)
-                                }
-                                renderRightActions={(progress, dragX, swipeable) => null}>
-                                <View className="flex h-[96px] w-full flex-row items-center gap-2 rounded-lg bg-neutral-800 p-2 shadow-lg">
-                                    <Image
-                                        className="aspect-square h-full rounded-lg"
-                                        source={{ uri: item.imageURL }}
-                                    />
-                                    <View className="flex h-full flex-1 justify-around">
-                                        <Text className="text-xl text-zinc-50" numberOfLines={1}>
-                                            {item.name}
-                                        </Text>
-                                        <Text className="text-zinc-50/80" numberOfLines={1}>
-                                            {item.type[0].toUpperCase()}
-                                            {item.type.slice(1, item.type.length - 1)}
-                                        </Text>
-                                    </View>
-                                    <Pressable
-                                        className="active:opacity-80"
-                                        onPress={async () => {
-                                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-
-                                            try {
-                                                const canOpen = await Linking.canOpenURL(item.uri);
-
-                                                if (canOpen) {
-                                                    await Linking.openURL(item.uri);
-                                                } else {
-                                                    await Linking.openURL(
-                                                        item.uri
-                                                            .split(":")
-                                                            .join("/")
-                                                            .replace(
-                                                                "spotify",
-                                                                "https://open.spotify.com"
-                                                            )
-                                                    );
-                                                }
-                                            } catch (error) {
-                                                console.error("Error opening Spotify:", error);
-                                            }
-                                        }}>
-                                        <View className="flex h-12 w-12 items-center justify-center rounded-full bg-green-500">
-                                            <FontAwesome name="play" size={20} />
+                            <View className="flex w-full flex-row items-center gap-4">
+                                <Checkbox
+                                    color={itemsToMove.includes(item) ? "#22C55E" : ""}
+                                    className={!isMoving ? "hidden" : ""}
+                                    onValueChange={() => {
+                                        if (itemsToMove.includes(item)) {
+                                            setItemsToMove((prev) =>
+                                                prev.filter((i) => i !== item)
+                                            );
+                                        } else {
+                                            setItemsToMove((prev) => [...prev, item]);
+                                        }
+                                    }}
+                                    value={itemsToMove.includes(item)}
+                                />
+                                <Swipeable
+                                    containerStyle={{ flex: 1 }}
+                                    onSwipeableCloseStartDrag={() =>
+                                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+                                    }
+                                    onSwipeableOpenStartDrag={() =>
+                                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+                                    }
+                                    overshootLeft={false}
+                                    renderLeftActions={(progress, dragX) =>
+                                        renderLeft(progress, dragX, item)
+                                    }
+                                    renderRightActions={(progress, dragX, swipeable) => null}>
+                                    <View className="flex h-[96px] w-full flex-row items-center gap-2 rounded-lg bg-neutral-800 p-2 shadow-lg">
+                                        <Image
+                                            className="aspect-square h-full rounded-lg"
+                                            source={{ uri: item.imageURL }}
+                                        />
+                                        <View className="flex h-full flex-1 justify-around">
+                                            <Text
+                                                className="text-xl text-zinc-50"
+                                                numberOfLines={1}>
+                                                {item.name}
+                                            </Text>
+                                            <Text className="text-zinc-50/80" numberOfLines={1}>
+                                                {item.type[0].toUpperCase()}
+                                                {item.type.slice(1, item.type.length - 1)}
+                                            </Text>
                                         </View>
-                                    </Pressable>
-                                </View>
-                            </Swipeable>
+                                        <Pressable
+                                            className="active:opacity-80"
+                                            onPress={async () => {
+                                                Haptics.impactAsync(
+                                                    Haptics.ImpactFeedbackStyle.Medium
+                                                );
+
+                                                try {
+                                                    const canOpen = await Linking.canOpenURL(
+                                                        item.uri
+                                                    );
+
+                                                    if (canOpen) {
+                                                        await Linking.openURL(item.uri);
+                                                    } else {
+                                                        await Linking.openURL(
+                                                            item.uri
+                                                                .split(":")
+                                                                .join("/")
+                                                                .replace(
+                                                                    "spotify",
+                                                                    "https://open.spotify.com"
+                                                                )
+                                                        );
+                                                    }
+                                                } catch (error) {
+                                                    console.error("Error opening Spotify:", error);
+                                                }
+                                            }}>
+                                            <View className="flex h-12 w-12 items-center justify-center rounded-full bg-green-500">
+                                                <FontAwesome name="play" size={20} />
+                                            </View>
+                                        </Pressable>
+                                    </View>
+                                </Swipeable>
+                            </View>
                         )}
                     />
                 ) : (

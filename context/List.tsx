@@ -61,7 +61,7 @@ export const ListProvider = ({ children }: { children: ReactNode }) => {
             const later = data.filter((item) => item.list === "later").map(transformItem);
             const today = data.filter((item) => item.list === "today").map(transformItem);
 
-            console.log(today)
+            console.log(today);
 
             setListenLater(later);
             setListenToday(today);
@@ -87,7 +87,14 @@ export const ListProvider = ({ children }: { children: ReactNode }) => {
         } catch (error) {}
     };
 
-    const value = { addToList, listenLater, listenToday, removeFromList };
+    const value = {
+        addToList,
+        listenLater,
+        listenToday,
+        removeFromList,
+        setListenLater,
+        setListenToday,
+    };
 
     return <ListContext.Provider value={value}>{children}</ListContext.Provider>;
 };

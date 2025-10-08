@@ -5,6 +5,8 @@ export type ListContextType = {
     listenLater: SpotifyItem[];
     listenToday: SpotifyItem[];
     removeFromList: (item: SpotifyItem, list: "later" | "today") => Promise<void>;
+    setListenLater: React.Dispatch<React.SetStateAction<SpotifyItem[]>>;
+    setListenToday: React.Dispatch<React.SetStateAction<SpotifyItem[]>>;
 };
 
 export type Mode = "" | "filter" | "prompt" | "sort";
