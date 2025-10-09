@@ -49,6 +49,15 @@ const Search = () => {
         };
     };
 
+    const getDuration = (item: any, type: string) => {
+        switch (type) {
+            case "episodes":
+                return item?.duration_ms;
+            default:
+                return null;
+        }
+    };
+
     const getDebouncedResults = useCallback(
         debounce(async (term: string) => {
             if (!term) {
@@ -74,6 +83,7 @@ const Search = () => {
                                         imageURL:
                                             item?.album?.images?.[0]?.url ||
                                             "https://placehold.co/400x400/1DB954/FFFFFF/png?text=No+Image",
+                                        duration: item?.duration_ms,
                                         name: item.name || "",
                                         type,
                                         uri: item.uri,
@@ -81,20 +91,25 @@ const Search = () => {
                             )
                         );
                     } else {
+                        console.log(type);
+
                         r.push(
                             ...data[type]?.items?.filter(Boolean).map((item) => {
                                 return {
                                     imageURL:
                                         item?.images?.[0]?.url ||
                                         "https://placehold.co/400x400/22C55E/FAFAFA/png?text=No+Image",
+                                    duration: getDuration(item, type),
                                     name: item?.name || "",
                                     type,
                                     uri: item.uri,
-                                } as SpotifyItem;
+                                } as unknown as SpotifyItem;
                             })
                         );
                     }
                 }
+
+                console.log(r);
 
                 for (let i = r.length - 1; i >= 0; i--) {
                     const j = Math.floor(Math.random() * i);
