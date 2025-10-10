@@ -49,8 +49,24 @@ const Search = () => {
         };
     };
 
-    const getDuration = (item: any, type: string) => {
+    const getDuration = async (item: any, type: string): Promise<null | number> => {
         switch (type) {
+            case "albums":
+                let duration = 0;
+                let url = `https://api.spotify.com/v1/albums/${item.id}/tracks?limit=50`;
+
+                do {
+                    const response = await fetch(url, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+                    const data = await response.json();
+
+                    data.items.forEach((item) => (duration += item.duration_ms));
+
+                    url = data.next;
+                } while (url);
+
+                return duration;
             case "episodes":
                 return item?.duration_ms;
             default:
@@ -91,28 +107,28 @@ const Search = () => {
                             )
                         );
                     } else {
-                        console.log(type);
+                        const promises = data[type]?.items?.filter(Boolean).map(async (item) => {
+                            return {
+                                imageURL:
+                                    item?.images?.[0]?.url ||
+                                    "https://placehold.co/400x400/22C55E/FAFAFA/png?text=No+Image",
+                                duration: await getDuration(item, type),
+                                name: item?.name || "",
+                                type,
+                                uri: item.uri,
+                            } as unknown as SpotifyItem;
+                        });
 
-                        r.push(
-                            ...data[type]?.items?.filter(Boolean).map((item) => {
-                                return {
-                                    imageURL:
-                                        item?.images?.[0]?.url ||
-                                        "https://placehold.co/400x400/22C55E/FAFAFA/png?text=No+Image",
-                                    duration: getDuration(item, type),
-                                    name: item?.name || "",
-                                    type,
-                                    uri: item.uri,
-                                } as unknown as SpotifyItem;
-                            })
-                        );
+                        const resolvedItems = await Promise.all(promises);
+
+                        r.push(...resolvedItems);
                     }
                 }
 
                 console.log(r);
 
                 for (let i = r.length - 1; i >= 0; i--) {
-                    const j = Math.floor(Math.random() * i);
+                    const j = Math.floor(Math.random() * (i + 1));
 
                     [r[i], r[j]] = [r[j], r[i]];
                 }
