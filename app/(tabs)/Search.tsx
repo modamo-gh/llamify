@@ -50,28 +50,48 @@ const Search = () => {
     };
 
     const getDuration = async (item: any, type: string): Promise<null | number> => {
-        switch (type) {
-            case "albums":
-                let duration = 0;
-                let url = `https://api.spotify.com/v1/albums/${item.id}/tracks?limit=50`;
+        let duration = 0;
+        let url;
 
-                do {
-                    const response = await fetch(url, {
-                        headers: { Authorization: `Bearer ${token}` },
-                    });
-                    const data = await response.json();
+        if (type === "albums") {
+            url = `https://api.spotify.com/v1/albums/${item.id}/tracks?limit=50`;
 
-                    data.items.forEach((item) => (duration += item.duration_ms));
+            do {
+                const response = await fetch(url, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                const data = await response.json();
 
-                    url = data.next;
-                } while (url);
+                data.items.forEach((item) => (duration += item.duration_ms));
 
-                return duration;
-            case "episodes":
-                return item?.duration_ms;
-            default:
-                return null;
+                url = data.next;
+            } while (url);
+
+            return duration;
         }
+
+        if (type === "audiobooks") {
+            url = `https://api.spotify.com/v1/audiobooks/${item.id}/chapters?limit=50`;
+
+            do {
+                const response = await fetch(url, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                const data = await response.json();
+
+                data.items.forEach((item) => (duration += item.duration_ms));
+
+                url = data.next;
+            } while (url);
+
+            return duration;
+        }
+
+        if (type === "episodes") {
+            return item?.duration_ms;
+        }
+
+        return null;
     };
 
     const getDebouncedResults = useCallback(
