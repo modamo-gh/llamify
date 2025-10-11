@@ -50,17 +50,19 @@ const Search = () => {
     };
 
     const getDuration = async (item: any, type: string): Promise<null | number> => {
+        let data;
         let duration = 0;
+        let response;
         let url;
 
         if (type === "albums") {
             url = `https://api.spotify.com/v1/albums/${item.id}/tracks?limit=50`;
 
             do {
-                const response = await fetch(url, {
+                response = await fetch(url, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
-                const data = await response.json();
+                data = await response.json();
 
                 data.items.forEach((item) => (duration += item.duration_ms));
 
@@ -74,10 +76,10 @@ const Search = () => {
             url = `https://api.spotify.com/v1/audiobooks/${item.id}/chapters?limit=50`;
 
             do {
-                const response = await fetch(url, {
+                response = await fetch(url, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
-                const data = await response.json();
+                data = await response.json();
 
                 data.items.forEach((item) => (duration += item.duration_ms));
 
@@ -89,6 +91,23 @@ const Search = () => {
 
         if (type === "episodes") {
             return item?.duration_ms;
+        }
+
+        if (type === "playlists") {
+            url = `https://api.spotify.com/v1/playlists/${item.id}/tracks?limit=50`;
+
+            do {
+                response = await fetch(url, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                data = await response.json();
+
+                data.items.forEach((item) => (duration += item.track.duration_ms));
+
+                url = data.next;
+            } while (url);
+
+            return duration;
         }
 
         return null;
