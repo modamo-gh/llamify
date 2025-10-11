@@ -64,7 +64,7 @@ const Search = () => {
                 });
                 data = await response.json();
 
-                data.items.forEach((item) => (duration += item.duration_ms));
+                data.items.forEach((track) => (duration += track?.duration_ms));
 
                 url = data.next;
             } while (url);
@@ -81,7 +81,7 @@ const Search = () => {
                 });
                 data = await response.json();
 
-                data.items.forEach((item) => (duration += item.duration_ms));
+                data.items.forEach((chapter) => (duration += chapter?.duration_ms));
 
                 url = data.next;
             } while (url);
@@ -102,7 +102,7 @@ const Search = () => {
                 });
                 data = await response.json();
 
-                data.items.forEach((item) => (duration += item.track.duration_ms));
+                data.items.forEach((i) => (duration += i?.track?.duration_ms || 0));
 
                 url = data.next;
             } while (url);
