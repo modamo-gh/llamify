@@ -110,6 +110,23 @@ const Search = () => {
             return duration;
         }
 
+        if (type === "shows") {
+            url = `https://api.spotify.com/v1/shows/${item.id}/episodes?limit=50`;
+
+            do {
+                response = await fetch(url, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                data = await response.json();
+
+                data.items.forEach((episode) => (duration += episode?.duration_ms || 0));
+
+                url = data.next;
+            } while (url);
+
+            return duration;
+        }
+
         return null;
     };
 
