@@ -26,6 +26,7 @@ export const ListProvider = ({ children }: { children: ReactNode }) => {
 
         try {
             await supabase.from("items").insert({
+                duration: item.duration,
                 image_url: item.imageURL,
                 list,
                 name: item.name,
@@ -49,6 +50,7 @@ export const ListProvider = ({ children }: { children: ReactNode }) => {
             const transformItem = (item) => {
                 return {
                     createdAt: new Date(item.created_at),
+                    duration: item.duration,
                     imageURL: item.image_url,
                     list: item.list,
                     name: item.name,
