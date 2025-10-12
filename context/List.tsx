@@ -87,7 +87,17 @@ export const ListProvider = ({ children }: { children: ReactNode }) => {
         } catch (error) {}
     };
 
-    const update = async (item: SpotifyItem, newList: List) => {
+    const updateItemDuration = async (item: SpotifyItem, duration: number) => {
+        try {
+            await supabase
+                .from("items")
+                .update({ duration })
+                .eq("user_id", user.id)
+                .eq("uri", item.uri);
+        } catch (error) {}
+    };
+
+    const updateItemList = async (item: SpotifyItem, newList: List) => {
         try {
             await supabase
                 .from("items")
@@ -99,12 +109,14 @@ export const ListProvider = ({ children }: { children: ReactNode }) => {
 
     const value = {
         addToList,
+        getLists,
         listenLater,
         listenToday,
         removeFromList,
         setListenLater,
         setListenToday,
-        update,
+        updateItemDuration,
+        updateItemList,
     };
 
     return <ListContext.Provider value={value}>{children}</ListContext.Provider>;

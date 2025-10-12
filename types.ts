@@ -2,12 +2,14 @@ import { AuthRequestPromptOptions, AuthSessionResult } from "expo-auth-session";
 
 export type ListContextType = {
     addToList: (item: SpotifyItem, list: "later" | "today") => Promise<void>;
+    getLists: () => Promise<void>;
     listenLater: SpotifyItem[];
     listenToday: SpotifyItem[];
     removeFromList: (item: SpotifyItem, list: "later" | "today") => Promise<void>;
     setListenLater: React.Dispatch<React.SetStateAction<SpotifyItem[]>>;
     setListenToday: React.Dispatch<React.SetStateAction<SpotifyItem[]>>;
-    update: (item: SpotifyItem, newList: List) => Promise<void>;
+    updateItemDuration: (item: SpotifyItem, duration: number) => Promise<void>;
+    updateItemList: (item: SpotifyItem, newList: List) => Promise<void>;
 };
 
 export type List = "later" | "today";

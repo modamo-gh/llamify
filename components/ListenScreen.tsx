@@ -1,6 +1,5 @@
 import { FontAwesome } from "@expo/vector-icons";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Checkbox } from "expo-checkbox";
 import * as Haptics from "expo-haptics";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -12,18 +11,26 @@ import Animated, {
     SharedValue,
     useAnimatedStyle,
 } from "react-native-reanimated";
+import { getDuration } from "~/app/(tabs)/Search";
 import { useList } from "~/context/List";
 import { useSpotify } from "~/context/Spotify";
 import { Mode, SpotifyItem } from "~/types";
 
 const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
-    const { removeFromList, setListenLater, setListenToday, update } = useList();
+    const {
+        getLists,
+        removeFromList,
+        setListenLater,
+        setListenToday,
+        updateItemDuration,
+        updateItemList,
+    } = useList();
 
     const snapPoints = useMemo(() => ["25%"], []);
 
     const ref = useRef<BottomSheet>(null);
 
-    const { user } = useSpotify();
+    const { token, user } = useSpotify();
 
     const [displayList, setDisplayList] = useState<SpotifyItem[]>(list);
     const [filters, setFilters] = useState<Map<string, boolean>>(
@@ -43,10 +50,23 @@ const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
     const [showBottomSheet, setBottomSheet] = useState(false);
 
     useEffect(() => {
-        console.log(
-            list[0].list,
-            list.filter((item) => item.duration === null)
-        );
+        const backfill = async () => {
+            const itemsWithoutDuration = list.filter(
+                (item) => item.duration === null && item.type !== "artists" && item.type !== "shows"
+            );
+
+            itemsWithoutDuration.forEach(async (item) => {
+                const duration = await getDuration(item, item.type, token);
+
+                if (duration) {
+                    await updateItemDuration(item, duration);
+                }
+            });
+
+            await getLists();
+        };
+
+        backfill();
     }, []);
 
     useEffect(() => {
@@ -355,7 +375,10 @@ const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
 
                             itemsToMove.forEach(
                                 async (item) =>
-                                    await update(item, item.list === "today" ? "later" : "today")
+                                    await updateItemList(
+                                        item,
+                                        item.list === "today" ? "later" : "today"
+                                    )
                             );
                             setItemsToMove([]);
                         }}>
@@ -408,16 +431,20 @@ const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
                                                 numberOfLines={1}>
                                                 {item.name}
                                             </Text>
-                                            <View className="flex flex-row gap-2">
-                                                <Text className="text-zinc-50/80">
-                                                    {item.type[0].toUpperCase()}
-                                                    {item.type.slice(1, item.type.length - 1)}
-                                                </Text>
-                                                {item.duration ? (
+                                            <View className="flex flex-row">
+                                                <View className="w-1/3">
                                                     <Text className="text-zinc-50/80">
-                                                        {convertDuration(item.duration)}
+                                                        {item.type[0].toUpperCase()}
+                                                        {item.type.slice(1, item.type.length - 1)}
                                                     </Text>
-                                                ) : null}
+                                                </View>
+                                                <View className="flex-2 w-2/3">
+                                                    {item.duration ? (
+                                                        <Text className="text-zinc-50/80">
+                                                            {convertDuration(item.duration)}
+                                                        </Text>
+                                                    ) : null}
+                                                </View>
                                             </View>
                                         </View>
                                         <Pressable

@@ -19,6 +19,85 @@ import { useList } from "~/context/List";
 import { useSpotify } from "~/context/Spotify";
 import { SpotifyItem } from "~/types";
 
+export const getDuration = async (
+    item: any,
+    type: string,
+    token: null | string
+): Promise<null | number> => {
+    let data;
+    let duration = 0;
+    let id = item.id || item.uri.split(":")[2];
+    let response;
+    let url;
+
+    if (type === "albums") {
+        url = `https://api.spotify.com/v1/albums/${id}/tracks?limit=50`;
+
+        do {
+            response = await fetch(url, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            data = await response.json();
+
+            data.items.forEach((track) => (duration += track?.duration_ms));
+
+            url = data.next;
+        } while (url);
+
+        return duration;
+    }
+
+    if (type === "audiobooks") {
+        url = `https://api.spotify.com/v1/audiobooks/${id}/chapters?limit=50`;
+
+        do {
+            response = await fetch(url, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            data = await response.json();
+
+            data.items.forEach((chapter) => (duration += chapter?.duration_ms));
+
+            url = data.next;
+        } while (url);
+
+        return duration;
+    }
+
+    if (type === "episodes") {
+        if (item?.duration_ms) {
+            return item?.duration_ms;
+        }
+
+        url = `https://api.spotify.com/v1/episodes/${id}`;
+        response = await fetch(url, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        data = await response.json();
+
+        return data.duration_ms;
+    }
+
+    if (type === "playlists") {
+        url = `https://api.spotify.com/v1/playlists/${id}/tracks?limit=50`;
+
+        do {
+            response = await fetch(url, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            data = await response.json();
+
+            data.items.forEach((i) => (duration += i?.track?.duration_ms || 0));
+
+            url = data.next;
+        } while (url);
+
+        return duration;
+    }
+
+    return null;
+};
+
 const Search = () => {
     const { addToList, listenLater, listenToday } = useList();
 
@@ -47,70 +126,6 @@ const Search = () => {
                 func(...args);
             }, delay);
         };
-    };
-
-    const getDuration = async (item: any, type: string): Promise<null | number> => {
-        let data;
-        let duration = 0;
-        let response;
-        let url;
-
-        if (type === "albums") {
-            url = `https://api.spotify.com/v1/albums/${item.id}/tracks?limit=50`;
-
-            do {
-                response = await fetch(url, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                data = await response.json();
-
-                data.items.forEach((track) => (duration += track?.duration_ms));
-
-                url = data.next;
-            } while (url);
-
-            return duration;
-        }
-
-        if (type === "audiobooks") {
-            url = `https://api.spotify.com/v1/audiobooks/${item.id}/chapters?limit=50`;
-
-            do {
-                response = await fetch(url, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                data = await response.json();
-
-                data.items.forEach((chapter) => (duration += chapter?.duration_ms));
-
-                url = data.next;
-            } while (url);
-
-            return duration;
-        }
-
-        if (type === "episodes") {
-            return item?.duration_ms;
-        }
-
-        if (type === "playlists") {
-            url = `https://api.spotify.com/v1/playlists/${item.id}/tracks?limit=50`;
-
-            do {
-                response = await fetch(url, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                data = await response.json();
-
-                data.items.forEach((i) => (duration += i?.track?.duration_ms || 0));
-
-                url = data.next;
-            } while (url);
-
-            return duration;
-        }
-
-        return null;
     };
 
     const getDebouncedResults = useCallback(
@@ -151,7 +166,7 @@ const Search = () => {
                                 imageURL:
                                     item?.images?.[0]?.url ||
                                     "https://placehold.co/400x400/22C55E/FAFAFA/png?text=No+Image",
-                                duration: await getDuration(item, type),
+                                duration: await getDuration(item, type, token),
                                 name: item?.name || "",
                                 type,
                                 uri: item.uri,
