@@ -86,6 +86,34 @@ const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
                     ? a.name.localeCompare(b.name)
                     : a.type.localeCompare(b.type),
         },
+        {
+            name: "Shortest First",
+            method: (a: SpotifyItem, b: SpotifyItem) => {
+                if (a.duration === null) {
+                    return 1;
+                }
+
+                if (b.duration === null) {
+                    return -1;
+                }
+
+                return a.duration! - b.duration!;
+            },
+        },
+        {
+            name: "Longest First",
+            method: (a: SpotifyItem, b: SpotifyItem) => {
+                if (a.duration === null) {
+                    return -1;
+                }
+
+                if (b.duration === null) {
+                    return 1;
+                }
+
+                return b.duration! - a.duration!;
+            },
+        },
     ];
 
     const displayBottomSheet = (mode: Mode) => {
