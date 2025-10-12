@@ -1,3 +1,4 @@
+import { Feather } from "@expo/vector-icons";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import * as Haptics from "expo-haptics";
 import { Stack } from "expo-router";
@@ -13,11 +14,10 @@ import {
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import ToastManager, { Toast } from "toastify-react-native";
 import { useList } from "~/context/List";
 import { useSpotify } from "~/context/Spotify";
 import { SpotifyItem } from "~/types";
-import ToastManager, { Toast } from "toastify-react-native";
-import { Feather } from "@expo/vector-icons";
 
 const Search = () => {
     const { addToList, listenLater, listenToday } = useList();
@@ -210,7 +210,7 @@ const Search = () => {
                             placeholderTextColor="#7D7D7D"
                             value={searchTerm}
                         />
-                        {searchTerm.length && (
+                        {searchTerm.length ? (
                             <Pressable
                                 className="flex h-12 w-12 items-center justify-center"
                                 onPress={() => {
@@ -221,7 +221,7 @@ const Search = () => {
                                 }}>
                                 <Feather color="#FAFAFA" name="x" size={20} />
                             </Pressable>
-                        )}
+                        ) : null}
                     </View>
                     <Image
                         className="aspect-square max-h-full max-w-full rounded-lg"
