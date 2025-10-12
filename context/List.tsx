@@ -61,8 +61,6 @@ export const ListProvider = ({ children }: { children: ReactNode }) => {
             const later = data.filter((item) => item.list === "later").map(transformItem);
             const today = data.filter((item) => item.list === "today").map(transformItem);
 
-            console.log(today);
-
             setListenLater(later);
             setListenToday(today);
         } catch (error) {
@@ -104,7 +102,7 @@ export const ListProvider = ({ children }: { children: ReactNode }) => {
         removeFromList,
         setListenLater,
         setListenToday,
-        update
+        update,
     };
 
     return <ListContext.Provider value={value}>{children}</ListContext.Provider>;
