@@ -43,23 +43,10 @@ const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
     const [showBottomSheet, setBottomSheet] = useState(false);
 
     useEffect(() => {
-        const migrateListenToday = async () => {
-            // await AsyncStorage.removeItem("llamify_hasBeenPrompted");
-
-            if (list.every((item) => item.list === "today")) {
-                const hasBeenPrompted =
-                    (await AsyncStorage.getItem("llamify_hasBeenPrompted")) || "false";
-
-                if (!JSON.parse(hasBeenPrompted)) {
-                    setMode("prompt");
-                    setBottomSheet(true);
-
-                    await AsyncStorage.setItem("llamify_hasBeenPrompted", "true");
-                }
-            }
-        };
-
-        migrateListenToday();
+        console.log(
+            list[0].list,
+            list.filter((item) => item.duration === null)
+        );
     }, []);
 
     useEffect(() => {
@@ -115,6 +102,32 @@ const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
             },
         },
     ];
+
+    const convertDuration = (duration: number) => {
+        const convertedDuration: string[] = [];
+
+        const hours = Math.floor(duration / (1000 * 60 * 60));
+
+        if (hours > 0) {
+            convertedDuration.push(`${hours} hr${hours !== 1 ? "s" : ""}`);
+
+            duration %= 1000 * 60 * 60;
+        }
+
+        const minutes = Math.floor(duration / (1000 * 60));
+
+        if (minutes > 0) {
+            convertedDuration.push(`${minutes} min${minutes !== 1 ? "s" : ""}`);
+
+            duration %= 1000 * 60;
+        }
+
+        const seconds = Math.floor(duration / 1000);
+
+        convertedDuration.push(`${seconds} sec${seconds !== 1 && "s"}`);
+
+        return convertedDuration.join(" ");
+    };
 
     const displayBottomSheet = (mode: Mode) => {
         switch (mode) {
@@ -395,10 +408,17 @@ const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
                                                 numberOfLines={1}>
                                                 {item.name}
                                             </Text>
-                                            <Text className="text-zinc-50/80" numberOfLines={1}>
-                                                {item.type[0].toUpperCase()}
-                                                {item.type.slice(1, item.type.length - 1)}
-                                            </Text>
+                                            <View className="flex flex-row gap-2">
+                                                <Text className="text-zinc-50/80">
+                                                    {item.type[0].toUpperCase()}
+                                                    {item.type.slice(1, item.type.length - 1)}
+                                                </Text>
+                                                {item.duration ? (
+                                                    <Text className="text-zinc-50/80">
+                                                        {convertDuration(item.duration)}
+                                                    </Text>
+                                                ) : null}
+                                            </View>
                                         </View>
                                         <Pressable
                                             className="active:opacity-80"
