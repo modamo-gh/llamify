@@ -55,13 +55,15 @@ const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
                 (item) => item.duration === null && item.type !== "artists" && item.type !== "shows"
             );
 
-            itemsWithoutDuration.forEach(async (item) => {
-                const duration = await getDuration(item, item.type, token);
+            await Promise.all(
+                itemsWithoutDuration.map(async (item) => {
+                    const duration = await getDuration(item, item.type, token);
 
-                if (duration) {
-                    await updateItemDuration(item, duration);
-                }
-            });
+                    if (duration) {
+                        await updateItemDuration(item, duration);
+                    }
+                })
+            );
 
             await getLists();
         };
