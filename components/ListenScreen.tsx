@@ -146,7 +146,7 @@ const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
 
         const seconds = Math.floor(duration / 1000);
 
-        convertedDuration.push(`${seconds} sec${seconds !== 1 && "s"}`);
+        convertedDuration.push(`${seconds} sec${seconds !== 1 ? "s" : ""}`);
 
         return convertedDuration.join(" ");
     };
