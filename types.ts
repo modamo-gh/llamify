@@ -14,7 +14,7 @@ export type ListContextType = {
 
 export type List = "later" | "today";
 
-export type Mode = "" | "filter" | "prompt" | "sort";
+export type Mode = "" | "filter" | "sort";
 
 export type SpotifyContextType = {
     isAuthenticated: boolean;
