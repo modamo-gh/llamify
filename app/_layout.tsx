@@ -1,3 +1,5 @@
+import "react-native-gesture-handler";
+
 import { Stack } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { ListProvider } from "~/context/List";
@@ -12,7 +14,7 @@ export default function RootLayout() {
     return (
         <SpotifyProvider>
             <ListProvider>
-                <GestureHandlerRootView>
+                <GestureHandlerRootView style={{ flex: 1 }}>
                     <Stack>
                         <Stack.Screen name="index" options={{ headerShown: false }} />
                         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
