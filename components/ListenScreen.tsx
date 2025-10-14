@@ -26,6 +26,7 @@ const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
         updateItemList,
     } = useList();
 
+    console.log(list)
     const snapPoints = useMemo(() => ["25%"], []);
 
     const ref = useRef<BottomSheet>(null);

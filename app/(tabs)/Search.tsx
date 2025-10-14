@@ -109,6 +109,7 @@ const Search = () => {
 
     const [inListenLater, setInListenLater] = useState(false);
     const [inListenToday, setInListenToday] = useState(false);
+    const [isRetrievingResults, setIsRetrievingResults] = useState(false);
     const [searchResults, setSearchResults] = useState<SpotifyItem[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedItem, setSelectedItem] = useState<null | SpotifyItem>(null);
@@ -135,6 +136,8 @@ const Search = () => {
             }
 
             try {
+                setIsRetrievingResults(true);
+
                 const results = await fetch(
                     `https://api.spotify.com/v1/search?q=${encodeURIComponent(term.trim())}&type=album,artist,audiobook,episode,playlist,show,track&limit=5`,
                     {
@@ -186,9 +189,12 @@ const Search = () => {
                 }
 
                 setSearchResults(r);
-            } catch (error) {}
+            } catch (error) {
+            } finally {
+                setIsRetrievingResults(false);
+            }
         }, 400),
-        []
+        [token]
     );
 
     const screenWidth = Dimensions.get("screen").width;
@@ -249,56 +255,65 @@ const Search = () => {
                             className="w-full flex-1"
                             columnWrapperClassName="gap-4"
                             contentContainerClassName="gap-4"
-                            data={searchResults}
+                            data={isRetrievingResults ? Array.from({ length: 8 }) : searchResults}
                             keyExtractor={(item, index) => `${index}`}
                             numColumns={2}
-                            renderItem={({ item }) => (
-                                <Pressable
-                                    className="active:opacity-80"
-                                    onPress={() => {
-                                        setSelectedItem(item);
-
-                                        const ilt = listenToday.some((i) => i.uri === item.uri);
-                                        const ill = listenLater.some((i) => i.uri === item.uri);
-
-                                        if (!ill || !ilt) {
-                                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                                        } else {
-                                            Haptics.notificationAsync(
-                                                Haptics.NotificationFeedbackType.Error
-                                            );
-
-                                            Toast.show({
-                                                backgroundColor: "#262626",
-                                                position: "bottom",
-                                                progressBarColor: "#EF4444",
-                                                textColor: "#FAFAFA",
-                                                text1: "Item exists in both lists already",
-                                                type: "error",
-                                            });
-                                        }
-
-                                        setShowBottomSheet(!ill || !ilt);
-                                        setInListenToday(ilt);
-                                        setInListenLater(ill);
-                                    }}>
+                            renderItem={({ item }) =>
+                                isRetrievingResults ? (
                                     <View
-                                        className="flex gap-2 rounded-lg bg-neutral-800 p-2 shadow-lg"
-                                        style={{ width: imageDimension }}>
-                                        <Image
-                                            className="aspect-square w-full rounded-lg"
-                                            source={{ uri: item.imageURL }}
-                                        />
-                                        <Text className="text-zinc-50" numberOfLines={1}>
-                                            {item.name}
-                                        </Text>
-                                        <Text className="text-zinc-50/80">
-                                            {item.type[0].toUpperCase()}
-                                            {item.type.slice(1, item.type.length - 1)}
-                                        </Text>
-                                    </View>
-                                </Pressable>
-                            )}
+                                        className="animate-pulse rounded-lg bg-neutral-800 p-2"
+                                        style={{ height: imageDimension, width: imageDimension }}
+                                    />
+                                ) : (
+                                    <Pressable
+                                        className="active:opacity-80"
+                                        onPress={() => {
+                                            setSelectedItem(item);
+
+                                            const ilt = listenToday.some((i) => i.uri === item.uri);
+                                            const ill = listenLater.some((i) => i.uri === item.uri);
+
+                                            if (!ill || !ilt) {
+                                                Haptics.impactAsync(
+                                                    Haptics.ImpactFeedbackStyle.Medium
+                                                );
+                                            } else {
+                                                Haptics.notificationAsync(
+                                                    Haptics.NotificationFeedbackType.Error
+                                                );
+
+                                                Toast.show({
+                                                    backgroundColor: "#262626",
+                                                    position: "bottom",
+                                                    progressBarColor: "#EF4444",
+                                                    textColor: "#FAFAFA",
+                                                    text1: "Item exists in both lists already",
+                                                    type: "error",
+                                                });
+                                            }
+
+                                            setShowBottomSheet(!ill || !ilt);
+                                            setInListenToday(ilt);
+                                            setInListenLater(ill);
+                                        }}>
+                                        <View
+                                            className="flex gap-2 rounded-lg bg-neutral-800 p-2 shadow-lg"
+                                            style={{ width: imageDimension }}>
+                                            <Image
+                                                className="aspect-square w-full rounded-lg"
+                                                source={{ uri: item.imageURL }}
+                                            />
+                                            <Text className="text-zinc-50" numberOfLines={1}>
+                                                {item.name}
+                                            </Text>
+                                            <Text className="text-zinc-50/80">
+                                                {item.type[0].toUpperCase()}
+                                                {item.type.slice(1, item.type.length - 1)}
+                                            </Text>
+                                        </View>
+                                    </Pressable>
+                                )
+                            }
                         />
                     ) : (
                         <Text className="text-xl text-zinc-50">Search for Items above</Text>
@@ -320,7 +335,7 @@ const Search = () => {
                                 onPress={() => {
                                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
-                                    addToList(selectedItem!, "today");
+                                    addToList({ ...selectedItem!, createdAt: new Date() }, "today");
 
                                     ref.current?.close();
 
@@ -344,7 +359,10 @@ const Search = () => {
                                 onPress={async () => {
                                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
-                                    await addToList(selectedItem!, "later");
+                                    await addToList(
+                                        { ...selectedItem!, createdAt: new Date() },
+                                        "later"
+                                    );
 
                                     ref.current?.close();
 
