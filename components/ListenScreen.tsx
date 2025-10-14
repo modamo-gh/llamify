@@ -4,7 +4,7 @@ import { Checkbox } from "expo-checkbox";
 import * as Haptics from "expo-haptics";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Dimensions, FlatList, Image, Linking, Pressable, Text, View } from "react-native";
-import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
+import { Swipeable } from "react-native-gesture-handler";
 import Animated, {
     Extrapolation,
     interpolate,
@@ -26,7 +26,7 @@ const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {
         updateItemList,
     } = useList();
 
-    console.log(list)
+    console.log(list);
     const snapPoints = useMemo(() => ["25%"], []);
 
     const ref = useRef<BottomSheet>(null);
