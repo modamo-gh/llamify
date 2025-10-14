@@ -19,7 +19,6 @@ export default {
         },
         icon: "./assets/icon.png",
         ios: {
-            buildNumber: "26",
             bundleIdentifier: "xyz.modamo.llamify",
             darkModeIcon: "./assets/icon.png",
             infoPlist: {
