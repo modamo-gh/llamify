@@ -19,7 +19,7 @@ export default {
         },
         icon: "./assets/icon.png",
         ios: {
-            buildNumber: "26",
+            buildNumber: "27",
             bundleIdentifier: "xyz.modamo.llamify",
             darkModeIcon: "./assets/icon.png",
             infoPlist: {
@@ -30,7 +30,7 @@ export default {
             supportsTablet: true,
         },
         name: "llamify",
-        newArchEnabled: false,
+        newArchEnabled: true,
         orientation: "portrait",
         owner: "morganthemosaic",
         plugins: ["expo-router", "expo-web-browser"],
