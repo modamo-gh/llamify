@@ -29,7 +29,6 @@ export default {
             supportsTablet: true,
         },
         name: "llamify",
-        newArchEnabled: false,
         orientation: "portrait",
         owner: "morganthemosaic",
         plugins: ["expo-router", "expo-web-browser"],
