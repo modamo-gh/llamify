@@ -1,7 +1,7 @@
 import { Stack } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ListenScreen from "~/components/ListenScreen";
-import { useList } from "~/legacy_removed/context/List";
+import { useList } from "~/context/List";
 
 const ListenToday = () => {
     const { listenToday } = useList();

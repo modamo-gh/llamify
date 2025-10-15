@@ -12,8 +12,8 @@ import Animated, {
     useAnimatedStyle,
 } from "react-native-reanimated";
 import { getDuration } from "~/legacy_removed/(tabs)/Search";
-import { useList } from "~/legacy_removed/context/List";
-import { useSpotify } from "~/legacy_removed/context/Spotify";
+import { useList } from "~/context/List";
+import { useSpotify } from "~/context/Spotify";
 import { Mode, SpotifyItem } from "~/types";
 
 const ListenScreen = ({ list }: { list: SpotifyItem[] }) => {

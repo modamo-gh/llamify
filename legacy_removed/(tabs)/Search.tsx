@@ -15,8 +15,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ToastManager, { Toast } from "toastify-react-native";
-import { useList } from "~/legacy_removed/context/List";
-import { useSpotify } from "~/legacy_removed/context/Spotify";
+import { useList } from "~/context/List";
+import { useSpotify } from "~/context/Spotify";
 import { SpotifyItem } from "~/types";
 
 export const getDuration = async (
